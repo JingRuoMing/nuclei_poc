@@ -1,0 +1,35 @@
+id: twitch-phish
+
+info:
+  name: Twitch phishing Detection
+  author: rxerium
+  severity: info
+  description: |
+    A twitch phishing website was detected
+  reference:
+    - https://twitch.tv
+  metadata:
+    max-request: 1
+  tags: phishing,twitch,osint
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    host-redirects: true
+    max-redirects: 2
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - 'Twitch is an interactive livestreaming service for content spanning gaming, entertainment, sports, music, and more. There’s something for everyone on Twitch.'
+
+      - type: status
+        status:
+          - 200
+
+      - type: dsl
+        dsl:
+          - '!contains(host,"twitch.tv")'
+# digest: 4a0a00473045022014079e3c52f5b1fa61326ba1f472731be05355c0c94a5e2c819e55a42ad6bf66022100a41b2d271593aac9606ad550cbc5c1405b43adfbaaa8fff74fadd7508ab220ae:922c64590222798bb761d5b6d8e72950

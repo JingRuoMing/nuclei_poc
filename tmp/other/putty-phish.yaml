@@ -1,0 +1,35 @@
+id: putty-phish
+
+info:
+  name: putty phishing Detection
+  author: rxerium
+  severity: info
+  description: |
+    A putty phishing website was detected
+  reference:
+    - https://putty.org
+  metadata:
+    max-request: 1
+  tags: phishing,putty,osint
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    host-redirects: true
+    max-redirects: 2
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - 'Download PuTTY - a free SSH and telnet client for Windows'
+
+      - type: status
+        status:
+          - 200
+
+      - type: dsl
+        dsl:
+          - '!contains(host,"putty.org")'
+# digest: 4a0a00473045022002242eceefe30b0d9104cfe2c7bba3240ed29caf0758661d9075a16d43723261022100d2efc79a521ed55c547f311f0f824436d4199eb9799715bcb93914bed8e79f0a:922c64590222798bb761d5b6d8e72950

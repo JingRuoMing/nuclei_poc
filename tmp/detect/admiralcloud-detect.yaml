@@ -1,0 +1,37 @@
+id: admiralcloud-detect
+
+info:
+  name: AdmiralCloud - Detect
+  author: righettod
+  severity: info
+  description: |
+    AdmiralCloud was detected.
+  reference:
+    - https://www.admiralcloud.com/en/
+  metadata:
+    verified: true
+    max-request: 1
+    shodan-query: http.title:"AdmiralCloud"
+  tags: tech,admiralcloud,detect
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    redirects: true
+    max-redirects: 2
+    matchers:
+      - type: dsl
+        dsl:
+          - 'status_code == 200'
+          - 'contains_any(to_lower(body), "content=\"admiralcloud", "<title>admiralcloud")'
+        condition: and
+
+    extractors:
+      - type: regex
+        part: body
+        group: 1
+        regex:
+          - '\s+([0-9\.]+)</title>'
+# digest: 4a0a00473045022100a80838f2e6e2111e41a311fd843b8bcf39cba7684451001ff515199805b7a9ac022004ea18154fb3d80b11013cd4be401f0f3f7e481c93dc15611e32d4fd0d9df276:922c64590222798bb761d5b6d8e72950

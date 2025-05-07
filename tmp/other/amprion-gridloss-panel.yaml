@@ -1,0 +1,34 @@
+id: amprion-gridloss-panel
+
+info:
+  name: Amprion Grid Loss Login Panel - Detect
+  author: righettod
+  severity: info
+  description: |
+    Amprion Grid Loss login panel was detected.
+  reference:
+    - https://www.amprion.net/index-2.html
+  metadata:
+    verified: true
+    max-request: 1
+  tags: panel,amprion,login,detect
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/config/public"
+
+    matchers:
+      - type: dsl
+        dsl:
+          - 'status_code == 200'
+          - 'contains(to_lower(body), "amprion") && contains(to_lower(body), "grid loss")'
+        condition: and
+
+    extractors:
+      - type: regex
+        part: body
+        group: 1
+        regex:
+          - '"envTitle":"([A-Z0-9a-z]+)"'
+# digest: 490a00463044022030de5e13b42cd54b74a338e79d5f22cddd26c42486ffa2360f9cb8ff4237e4de022034170bf9e150890594f6488fd3ba2596aae954d40f254d4f5cd684eb1848bf65:922c64590222798bb761d5b6d8e72950

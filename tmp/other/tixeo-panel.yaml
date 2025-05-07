@@ -1,0 +1,38 @@
+id: tixeo-panel
+
+info:
+  name: Tixeo Login Panel - Detect
+  author: righettod
+  severity: info
+  description: |
+    Tixeo login panel was detected.
+  reference:
+    - https://www.tixeo.com/en/
+  metadata:
+    verified: true
+    max-request: 3
+    shodan-query: "http.title:\"tixeo\""
+  tags: panel,tixeo,login,detect
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/meet/services/json/v1/settings"
+      - "{{BaseURL}}/meet/login.html"
+      - "{{BaseURL}}/meet/"
+
+    stop-at-first-match: true
+
+    matchers:
+      - type: dsl
+        dsl:
+          - 'contains(header, "Tixeo")'
+          - 'contains_any(to_lower(body), "tixeo-button", "tixeoclient")'
+        condition: or
+
+    extractors:
+      - type: regex
+        part: body
+        group: 1
+        regex:
+          - '"applicationVersion"\s*:\s*"([0-9.]+)"'
+# digest: 4b0a00483046022100f7e1ccfe2cfdeabb5b09d385a28439e70d47baf14257827aebf769821aacabb502210088b14b7796f7d0f153c470520526f58306580c8fd85f3cac250c0ab25331c836:922c64590222798bb761d5b6d8e72950

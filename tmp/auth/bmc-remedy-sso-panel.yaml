@@ -1,0 +1,31 @@
+id: bmc-remedy-sso-panel
+
+info:
+  name: BMC Remedy SSO Login Panel - Detect
+  author: righettod
+  severity: info
+  description: |
+    BMC Remedy Single Sign-On domain data entry login panel was detected.
+  reference:
+    - https://www.bmc.com/it-solutions/remedy-itsm.html
+  metadata:
+    verified: true
+    max-request: 2
+    shodan-query: http.title:"BMC Remedy Single Sign-On domain data entry"
+  tags: panel,bmc,login,detect
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/arsys/"
+      - "{{BaseURL}}/webUI/userHome.do"
+
+    stop-at-first-match: true
+
+    matchers:
+      - type: dsl
+        dsl:
+          - 'status_code == 200'
+          - 'contains(to_lower(body), "<title>bmc remedy single sign-on domain data entry")'
+        condition: and
+# digest: 4b0a0048304602210095082fcec628bf3f09183eadec2f2b6fe85000f29f2c19411bce98bd8913e4270221008ee1c9dc78aa766722103649b0cae30d93217945149c5ab781fdd1bc8b42140d:922c64590222798bb761d5b6d8e72950

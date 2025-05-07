@@ -1,0 +1,35 @@
+id: roblox-phish
+
+info:
+  name: roblox phishing Detection
+  author: rxerium
+  severity: info
+  description: |
+    A roblox phishing website was detected
+  reference:
+    - https://roblox.com
+  metadata:
+    max-request: 1
+  tags: phishing,roblox,osint
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    host-redirects: true
+    max-redirects: 2
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - 'Roblox is ushering in the next generation of entertainment. Imagine, create, and play together with millions of people across an infinite variety of immersive, user-generated 3D worlds.'
+
+      - type: status
+        status:
+          - 200
+
+      - type: dsl
+        dsl:
+          - '!contains(host,"roblox.com")'
+# digest: 4a0a00473045022100b5ad8c52102d3442fbd6cfc1520f6ea42e0e0289fc0e92c7c052086c999c517e022064caa5ba4f25a19a07a216936414df3aa50ef5cf566f736a39fb8c8e2c61e1d9:922c64590222798bb761d5b6d8e72950

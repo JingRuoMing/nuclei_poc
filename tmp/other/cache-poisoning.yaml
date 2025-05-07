@@ -1,0 +1,39 @@
+id: cache-poisoning
+
+info:
+  name: Cache Poisoning Detection
+  author: omkar7505
+  severity: medium
+  description: This template detects Cache poisoning.
+  reference:
+    - https://gitbook.seguranca-informatica.pt/fuzzing-and-web/cache-poisoning-using-nuclei
+    - https://portswigger.net/research/practical-web-cache-poisoning
+    - https://portswigger.net/web-security/web-cache-poisoning
+  metadata:
+    max-request: 2
+  tags: cache,generic
+variables:
+  cache_key: "{{to_lower(rand_base(6))}}"
+
+http:
+  - raw:
+      - |
+        GET /?{{cache_key}}=1 HTTP/1.1
+        Host: {{Hostname}}
+        X-Forwarded-Prefix: omkar7505
+        X-Forwarded-Host: omkar7505
+        X-Forwarded-For: omkar7505
+        X-Originating-IP: omkar7505
+        X-Remote-Addr: omkar7505
+        X-Client-IP: omkar7505
+        Referer: omkar7505
+        User-agent: omkar7505
+        
+      - |
+        GET /?{{cache_key}}=1 HTTP/1.1
+        Host: {{Hostname}}
+
+    matchers:
+      - type: dsl
+        dsl:
+          - 'contains(body_2, "omkar7505")'
