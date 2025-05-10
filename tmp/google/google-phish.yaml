@@ -1,0 +1,35 @@
+id: google-phish
+
+info:
+  name: Google phishing Detection
+  author: rxerium
+  severity: info
+  description: |
+    A google phishing website was detected
+  reference:
+    - https://google.com
+  metadata:
+    max-request: 1
+  tags: phishing,google,osint
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    host-redirects: true
+    max-redirects: 2
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - 'Sign in - Google Accounts'
+
+      - type: status
+        status:
+          - 200
+
+      - type: dsl
+        dsl:
+          - '!contains(host,"google.com")'
+# digest: 490a00463044022046913d3a634f491d4bc4f7474154bb065b54ff408c493a3a898a17974c0126b802204e418c2d8322a3bea31c2258e2f85c395675167b4afd459e386ab7d836bebe83:922c64590222798bb761d5b6d8e72950
