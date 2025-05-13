@@ -1,0 +1,32 @@
+id: procore-panel
+
+info:
+  name: Procore Login - Panel
+  author: rxerium
+  severity: info
+  metadata:
+    max-request: 2
+    verified: true
+    shodan-query: http.favicon.hash:1952289652
+  tags: panel,login,detect,procore
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+      - "{{BaseURL}}/favicon.ico"
+      - "{{BaseURL}}/images/favicon.ico"
+
+    stop-at-first-match: true
+    matchers-condition: or
+    matchers:
+      - type: dsl
+        dsl:
+          - "status_code==200 && (\"1952289652\" == mmh3(base64_py(body)))"
+
+      - type: word
+        words:
+          - '<title>Procore Log In</title>'
+          - 'Log in to your Procore account using your email and password'
+        condition: and
+# digest: 4a0a004730450220131670fbc6f6b98f5bbf6fc8067cb822da2aecbf3c07348d59b37da9fadf6758022100c77943af24946ba4c3170f0e40f8976076e3428412b74dcdc07210ddf8b9b549:922c64590222798bb761d5b6d8e72950
