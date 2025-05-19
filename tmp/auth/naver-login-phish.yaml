@@ -1,0 +1,37 @@
+id: naver-login-phish
+
+info:
+  name: naver login phishing Detection
+  author: hahwul
+  severity: info
+  description: |
+    A naver login phishing website was detected
+  reference:
+    - https://nid.naver.com
+    - https://www.navercorp.com
+  metadata:
+    max-request: 1
+  tags: phishing,naver,osint
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    host-redirects: true
+    max-redirects: 2
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - '네이버 : 로그인'
+          - '로그인'
+
+      - type: status
+        status:
+          - 200
+
+      - type: dsl
+        dsl:
+          - '!contains(host,"nid.naver.com")'
+# digest: 4a0a00473045022100d04a5c82e6673bab3a00b2fbeb83a1f702858ca21362d98017ce3fdbe4ffdcfc02204a9606bab5d9f3925ccf6eac064f1a1c9a795e963b583f9bbc45a082676a66e8:922c64590222798bb761d5b6d8e72950
