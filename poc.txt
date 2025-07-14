@@ -10589,6 +10589,7 @@
 ./poc/cisco/cisco-cloudcenter-suite-rce.yaml
 ./poc/cisco/cisco-cm-panel.yaml
 ./poc/cisco/cisco-cm-panel_1.yaml
+./poc/cisco/cisco-cm-panel_2.yaml
 ./poc/cisco/cisco-edge-340-936.yaml
 ./poc/cisco/cisco-edge-340.yaml
 ./poc/cisco/cisco-edge-340_1.yaml
@@ -10633,6 +10634,7 @@
 ./poc/cisco/cisco-prime-infrastructure_2.yaml
 ./poc/cisco/cisco-prime-license-manager-panel.yaml
 ./poc/cisco/cisco-prime-license-manager-panel_1.yaml
+./poc/cisco/cisco-prime-license-manager-panel_2.yaml
 ./poc/cisco/cisco-prime-network-registrar.yaml
 ./poc/cisco/cisco-rv-series-rce.yaml
 ./poc/cisco/cisco-sd-wan-955.yaml
@@ -45810,6 +45812,7 @@
 ./poc/cve/CVE-2022-23379.yaml
 ./poc/cve/CVE-2022-23384.yaml
 ./poc/cve/CVE-2022-2339.yaml
+./poc/cve/CVE-2022-23397.yaml
 ./poc/cve/CVE-2022-2340-eb9a94bccbe4e8dce1906ce6d63f24d0.yaml
 ./poc/cve/CVE-2022-2340.yaml
 ./poc/cve/CVE-2022-2340_1.yaml
@@ -106090,6 +106093,7 @@
 ./poc/cve/CVE-2025-34032.yaml
 ./poc/cve/CVE-2025-3404-ffabe96ec7250fc9b334d8b9b9bd748e.yaml
 ./poc/cve/CVE-2025-34040.yaml
+./poc/cve/CVE-2025-34085.yaml
 ./poc/cve/CVE-2025-3415.yaml
 ./poc/cve/CVE-2025-3417-1d6a9664ecd54a09078e61fac0c7dcdd.yaml
 ./poc/cve/CVE-2025-3418-0aa49a393e7dc8d08134f92ab4c73898.yaml
@@ -107443,6 +107447,7 @@
 ./poc/cve/CVE-2025-5237.yaml
 ./poc/cve/CVE-2025-5238.yaml
 ./poc/cve/CVE-2025-5239.yaml
+./poc/cve/CVE-2025-52488.yaml
 ./poc/cve/CVE-2025-5258.yaml
 ./poc/cve/CVE-2025-5259.yaml
 ./poc/cve/CVE-2025-52707.yaml
@@ -116669,6 +116674,7 @@
 ./poc/detect/aspnet-version-detect_2.yaml
 ./poc/detect/assetlinks-detect.yaml
 ./poc/detect/assetlinks-detect_1.yaml
+./poc/detect/assetlinks-detect_2.yaml
 ./poc/detect/atlantis-detect.yaml
 ./poc/detect/atlantis-detect_1.yaml
 ./poc/detect/atlantis-detect_2.yaml
@@ -117195,6 +117201,7 @@
 ./poc/detect/directus-detect_1.yaml
 ./poc/detect/discord-invite-detect.yaml
 ./poc/detect/discord-invite-detect_1.yaml
+./poc/detect/discord-invite-detect_2.yaml
 ./poc/detect/dizquetv-detect.yaml
 ./poc/detect/dizquetv-detect_1.yaml
 ./poc/detect/django-debug-detect_1.yaml
@@ -119236,6 +119243,7 @@
 ./poc/detect/torchserve-detect_1.yaml
 ./poc/detect/torrent-website-detect.yaml
 ./poc/detect/torrent-website-detect_1.yaml
+./poc/detect/torrent-website-detect_2.yaml
 ./poc/detect/totemomail-detect-10819.yaml
 ./poc/detect/totemomail-detect-10819_1.yaml
 ./poc/detect/totemomail-detect.yaml
@@ -152499,6 +152507,7 @@
 ./poc/other/fbgorilla_2.yaml
 ./poc/other/fbi-seized-nameserver.yaml
 ./poc/other/fbi-seized-nameserver_1.yaml
+./poc/other/fbi-seized-nameserver_2.yaml
 ./poc/other/fbpromotions-a00b2d6a30a28ce9c75c1eccf4749b2b.yaml
 ./poc/other/fbpromotions.yaml
 ./poc/other/fbpromotions_1.yaml
@@ -195615,6 +195624,7 @@
 ./poc/remote_code_execution/import-woocommerce_1.yaml
 ./poc/remote_code_execution/import-woocommerce_2.yaml
 ./poc/remote_code_execution/in-stock-mailer-for-woocommerce-75dcf41c567907d2b184b07e8f3bf6c2.yaml
+./poc/remote_code_execution/infoblox-netmri-rails-cookie-rce.yaml
 ./poc/remote_code_execution/informatica-powercenter.yaml
 ./poc/remote_code_execution/inpost-for-woocommerce-97902ed319f08ee51d1d432495693fd7.yaml
 ./poc/remote_code_execution/inpost-for-woocommerce.yaml
