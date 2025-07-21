@@ -2009,12 +2009,14 @@
 ./poc/auth/appsmith-web-login_2.yaml
 ./poc/auth/appsmith-web-login_2_1.yaml
 ./poc/auth/appsmith-web-login_3.yaml
+./poc/auth/arcgis-token-service-detect.yaml
 ./poc/auth/arcgis-tokens.yaml
 ./poc/auth/arcgis-tokens_1.yaml
 ./poc/auth/arcgis-tokens_1_1.yaml
 ./poc/auth/arcgis-tokens_2.yaml
 ./poc/auth/arcgis-tokens_3.yaml
 ./poc/auth/arcgis-tokens_4.yaml
+./poc/auth/arcgis-tokens_5.yaml
 ./poc/auth/argocd-login-534.yaml
 ./poc/auth/argocd-login-535.yaml
 ./poc/auth/argocd-login-536.yaml
@@ -10843,6 +10845,7 @@
 ./poc/cisco/cisco-asa-panel_1.yaml
 ./poc/cisco/cisco-asa-panel_2.yaml
 ./poc/cisco/cisco-asa-panel_3.yaml
+./poc/cisco/cisco-asa-panel_4.yaml
 ./poc/cisco/cisco-asa-version.yaml
 ./poc/cisco/cisco-broadworks-log4j-rce.yaml
 ./poc/cisco/cisco-broadworks-log4j-rce_1.yaml
@@ -107932,6 +107935,7 @@
 ./poc/cve/CVE-2025-4420.yaml
 ./poc/cve/CVE-2025-4427-fix.yaml
 ./poc/cve/CVE-2025-4427.yaml
+./poc/cve/CVE-2025-4427_1.yaml
 ./poc/cve/CVE-2025-4429.yaml
 ./poc/cve/CVE-2025-4431-fbe936a42c654c0a7ab0ef165ec55ccd.yaml
 ./poc/cve/CVE-2025-4431.yaml
@@ -109250,6 +109254,7 @@
 ./poc/cve/CVE-2025-7059.yaml
 ./poc/cve/CVE-2025-7327-4db70a3dbcf5fc486e4318bb91833e38.yaml
 ./poc/cve/CVE-2025-7340-bf05aaa9a814e800d553d13b6df8e195.yaml
+./poc/cve/CVE-2025-7354-eb487e5a11f8a30a5dd764d15e4f12cb.yaml
 ./poc/cve/CVE-2025-7359-91bbdfbf54e71d11da6ccfeac70f8964.yaml
 ./poc/cve/CVE-2025-7360-d2266090615ece1463c36d19688797df.yaml
 ./poc/cve/CVE-2025-7367-10fa9da04357a78e786a63af7187fa6f.yaml
@@ -132352,6 +132357,7 @@
 ./poc/nodejs/aliexpress-phish_6_1.yaml
 ./poc/nodejs/aliexpress-phish_6_2.yaml
 ./poc/nodejs/aliexpress-phish_7.yaml
+./poc/nodejs/aliexpress-phish_7_1.yaml
 ./poc/nodejs/aliexpress-phish_8.yaml
 ./poc/nodejs/american-express-phish.yaml
 ./poc/nodejs/american-express-phish_1.yaml
@@ -134655,6 +134661,7 @@
 ./poc/other/access-files_1.yaml
 ./poc/other/access-log-21.yaml
 ./poc/other/access-log-22.yaml
+./poc/other/access-log-file.yaml
 ./poc/other/access-log.yaml
 ./poc/other/access-log_1.yaml
 ./poc/other/access-log_2.yaml
@@ -139626,6 +139633,7 @@
 ./poc/other/bank-mellat_2.yaml
 ./poc/other/bank-of-america-phish.yaml
 ./poc/other/bank-of-america-phish_1.yaml
+./poc/other/bank-of-america-phish_10.yaml
 ./poc/other/bank-of-america-phish_1_1.yaml
 ./poc/other/bank-of-america-phish_2.yaml
 ./poc/other/bank-of-america-phish_3.yaml
@@ -139799,6 +139807,7 @@
 ./poc/other/battlenet-phish_7.yaml
 ./poc/other/battlenet-phish_7_1.yaml
 ./poc/other/battlenet-phish_8.yaml
+./poc/other/battlenet-phish_8_1.yaml
 ./poc/other/battlenet-phish_9.yaml
 ./poc/other/bauernregeln-8443e67ced563afdafab20485c810d8f.yaml
 ./poc/other/bauernregeln.yaml
@@ -140518,6 +140527,7 @@
 ./poc/other/bitdefender-gravityzone_4.yaml
 ./poc/other/bitdefender-phish.yaml
 ./poc/other/bitdefender-phish_1.yaml
+./poc/other/bitdefender-phish_10.yaml
 ./poc/other/bitdefender-phish_1_1.yaml
 ./poc/other/bitdefender-phish_2.yaml
 ./poc/other/bitdefender-phish_3.yaml
@@ -141931,6 +141941,7 @@
 ./poc/other/brighthr-phish_7_1.yaml
 ./poc/other/brighthr-phish_8.yaml
 ./poc/other/brighthr-phish_8_1.yaml
+./poc/other/brighthr-phish_9.yaml
 ./poc/other/brilliance-66ba1859ab560343222a23f4bdd2510b.yaml
 ./poc/other/brilliance-6b103802dc6e79ab184de7caf446bc92.yaml
 ./poc/other/brilliance-74b1251357fcf0110169efe21575177a.yaml
@@ -144505,6 +144516,7 @@
 ./poc/other/citizen-space_1.yaml
 ./poc/other/citizen-space_2.yaml
 ./poc/other/citrix-access-gateway.yaml
+./poc/other/citrix-adc-gateway-panel.yaml
 ./poc/other/citrix-hypervisor-page.yaml
 ./poc/other/citrix-hypervisor-page_1.yaml
 ./poc/other/citrix-hypervisor-page_2.yaml
@@ -149316,6 +149328,7 @@
 ./poc/other/disneyplus-phish_5_1.yaml
 ./poc/other/disneyplus-phish_6.yaml
 ./poc/other/disneyplus-phish_7.yaml
+./poc/other/disneyplus-phish_8.yaml
 ./poc/other/display-a-meta-field-as-block-3651ac54124280b3e2d4d7a808a8f468.yaml
 ./poc/other/display-a-meta-field-as-block.yaml
 ./poc/other/display-admin-page-on-frontend-6c0fa46386393b85d0ad0c373ab077eb.yaml
@@ -151343,6 +151356,7 @@
 ./poc/other/ebay-phish_6_2.yaml
 ./poc/other/ebay-phish_7.yaml
 ./poc/other/ebay-phish_8.yaml
+./poc/other/ebay-phish_9.yaml
 ./poc/other/ebecas-5fcfafe45732cb35841626b129877572.yaml
 ./poc/other/ebecas.yaml
 ./poc/other/ebecas_1.yaml
@@ -153685,6 +153699,7 @@
 ./poc/other/evernote-phish_7_1.yaml
 ./poc/other/evernote-phish_8.yaml
 ./poc/other/evernote-phish_8_1.yaml
+./poc/other/evernote-phish_9.yaml
 ./poc/other/evernote-sync-5ea6e896f5fe819671eaa8a4ed1d4cf3.yaml
 ./poc/other/evernote-sync.yaml
 ./poc/other/everse-17fc51aa37d10e0ca84f28f9824fff90.yaml
@@ -154961,6 +154976,7 @@
 ./poc/other/filezilla-phish_6_2.yaml
 ./poc/other/filezilla-phish_7.yaml
 ./poc/other/filezilla-phish_8.yaml
+./poc/other/filezilla-phish_8_1.yaml
 ./poc/other/filezilla.yaml
 ./poc/other/filezilla_1.yaml
 ./poc/other/filezilla_2.yaml
@@ -163142,6 +163158,7 @@
 ./poc/other/keepersecurity-phish_7.yaml
 ./poc/other/keepersecurity-phish_7_1.yaml
 ./poc/other/keepersecurity-phish_8.yaml
+./poc/other/keepersecurity-phish_9.yaml
 ./poc/other/kemai-ras-ultra-vires-access.yaml
 ./poc/other/kemai-ras-ultra-vires-access_1.yaml
 ./poc/other/kemp-loadmaster-panel.yaml
@@ -169919,6 +169936,7 @@
 ./poc/other/nexus-panel_4.yaml
 ./poc/other/nexus-panel_4_1.yaml
 ./poc/other/nexus-panel_5.yaml
+./poc/other/nexus-panel_5_1.yaml
 ./poc/other/nexus-panel_6.yaml
 ./poc/other/nexus-panel_7.yaml
 ./poc/other/nexus-panel_8.yaml
@@ -172331,6 +172349,7 @@
 ./poc/other/paypal-phish_5.yaml
 ./poc/other/paypal-phish_6.yaml
 ./poc/other/paypal-phish_7.yaml
+./poc/other/paypal-phish_8.yaml
 ./poc/other/paypal-promotions-and-insights.yaml
 ./poc/other/paypal-responder.yaml
 ./poc/other/payplus-payment-gateway-589fa37c83e960863b6bccfa6aa68633.yaml
@@ -176352,6 +176371,7 @@
 ./poc/other/quora-phish_6.yaml
 ./poc/other/quora-phish_6_1.yaml
 ./poc/other/quora-phish_7.yaml
+./poc/other/quora-phish_7_1.yaml
 ./poc/other/quora-phish_8.yaml
 ./poc/other/quota-453b39613dcca9c94569ea039b8538d4.yaml
 ./poc/other/quota.yaml
@@ -180718,10 +180738,12 @@
 ./poc/other/shortcodes-ultimate-a10c44000004842936b83f20d90af46d.yaml
 ./poc/other/shortcodes-ultimate-ae98f9e61abdd841d962916e95b11125.yaml
 ./poc/other/shortcodes-ultimate-b4cd28915b549396946861ebc0993f5e.yaml
+./poc/other/shortcodes-ultimate-b65acc29a52f7be4ed97dad780bc7d2c.yaml
 ./poc/other/shortcodes-ultimate-cd8c774eafb6ee8873a6aabaf279585b.yaml
 ./poc/other/shortcodes-ultimate-d0d677c772572ac5e9576b0df844bd34.yaml
 ./poc/other/shortcodes-ultimate-d41d8cd98f00b204e9800998ecf8427e.yaml
 ./poc/other/shortcodes-ultimate-d69fa5d2cbf2995229663d3c8e7d15a3.yaml
+./poc/other/shortcodes-ultimate-ddc6fd16c6f322824558a9d2b57a4fcd.yaml
 ./poc/other/shortcodes-ultimate-eb3a75552bc1607158320a8916c658bb.yaml
 ./poc/other/shortcodes-ultimate-ed1d395d3f478703dd5d03e96b8ff2ff.yaml
 ./poc/other/shortcodes-ultimate-f092e6c75d20b9ed16374591753831f0.yaml
@@ -185375,6 +185397,7 @@
 ./poc/other/sync-storage-phish_6.yaml
 ./poc/other/sync-storage-phish_6_1.yaml
 ./poc/other/sync-storage-phish_7.yaml
+./poc/other/sync-storage-phish_8.yaml
 ./poc/other/syncee-for-suppliers-0a97e8c1d07e642d1bb81ea193010ade.yaml
 ./poc/other/syncee-for-suppliers-6d3a9c8473bf020a066f620be95a27e8.yaml
 ./poc/other/syncee-for-suppliers-d41d8cd98f00b204e9800998ecf8427e.yaml
@@ -187701,6 +187724,7 @@
 ./poc/other/trading212-phish_6.yaml
 ./poc/other/trading212-phish_7.yaml
 ./poc/other/trading212-phish_8.yaml
+./poc/other/trading212-phish_9.yaml
 ./poc/other/tradingeye.yaml
 ./poc/other/traefik-dashboard-10832.yaml
 ./poc/other/traefik-dashboard-10834.yaml
@@ -192232,6 +192256,7 @@
 ./poc/other/winning-portfolio.yaml
 ./poc/other/winscp-phish.yaml
 ./poc/other/winscp-phish_1.yaml
+./poc/other/winscp-phish_10.yaml
 ./poc/other/winscp-phish_1_1.yaml
 ./poc/other/winscp-phish_2.yaml
 ./poc/other/winscp-phish_3.yaml
@@ -203522,6 +203547,7 @@
 ./poc/sharepoint/microsoft-sharepoint.yaml
 ./poc/sharepoint/sharepoint-object-listing.yaml
 ./poc/sharepoint/sharepoint-object-listing_1.yaml
+./poc/sharepoint/sharepoint-toolshell-backdoor.yaml
 ./poc/shopify/import-shopify-to-woocommerce-5deb9cef1a1765aac5362c5a9badb4e5.yaml
 ./poc/shopify/import-shopify-to-woocommerce.yaml
 ./poc/shopify/migrate-shopify-to-woocommerce-f6337bdcdfdce1b6c57c973b30d848b5.yaml
@@ -208426,6 +208452,7 @@
 ./poc/sql/CVE-2025-46522-291f3db8294be495c53e158c8ecf8b9e.yaml
 ./poc/sql/CVE-2025-46534-005fa8c3c4547c31fb490a7a61dba8a8.yaml
 ./poc/sql/CVE-2025-4669-bbcfd6717dbe3462e77963b6e3b3ad16.yaml
+./poc/sql/CVE-2025-4685-4689bdb909b54c8c21c0bc96ace43cff.yaml
 ./poc/sql/CVE-2025-47473-f51db54aa424800d031160125a32b684.yaml
 ./poc/sql/CVE-2025-47494-30edb92f8b80e1349129e203807c523d.yaml
 ./poc/sql/CVE-2025-47499-5432bc07cf496a70e1f7bdb4225cc953.yaml
@@ -208447,6 +208474,7 @@
 ./poc/sql/CVE-2025-6813-9d75181e7673053db9a09c5d63504d41.yaml
 ./poc/sql/CVE-2025-7035-0a58e5ddc8db9e9c9550cc21a8781dc4.yaml
 ./poc/sql/CVE-2025-7341-f99fdcb9b9b1f7689d5f8bdbaaa6853b.yaml
+./poc/sql/CVE-2025-7369-b9727fefc26ddbd10226e50228ce165d.yaml
 ./poc/sql/CVE-2025-7655-cf4d8f17466968be64ea1e1e98857dbc.yaml
 ./poc/sql/CVE-2025-7660-915b7ce5f9359307db3456a2d0e7170a.yaml
 ./poc/sql/CVE-2025-7697-25ca9784b156d835388508bbdb90d9a2.yaml
@@ -211290,6 +211318,7 @@
 ./poc/sql/gutenberg-473ee8bf14d3072db945b2d98be5decb.yaml
 ./poc/sql/gutenkit-blocks-addon-dc2db3b637ac59ac77a8a461b1b6b7f9.yaml
 ./poc/sql/gutenslider-6477bf18cad6c823db485408d49b337b.yaml
+./poc/sql/gutentor-59f3804b7aca6b2db9a4e39ef32f72f0.yaml
 ./poc/sql/gwebpro-store-locator-a48522809c277db29c19ddd5318a9a6f.yaml
 ./poc/sql/gwolle-gb-580427e1f9db121cb03f75dfe62e8f9e.yaml
 ./poc/sql/gym-management-800ec55f585fc2a792f8b3d2c4dbfd1d.yaml
@@ -212182,6 +212211,7 @@
 ./poc/sql/myriad-e7ede6314c209b97480a8f0916dbaa81.yaml
 ./poc/sql/mysql-detect.yaml
 ./poc/sql/mysql-detect_1.yaml
+./poc/sql/mysql-dump.yaml
 ./poc/sql/mysql-empty-password.yaml
 ./poc/sql/mysql-history.yaml
 ./poc/sql/mysql-history_1.yaml
