@@ -107568,8 +107568,10 @@
 ./poc/cve/CVE-2025-34032.yaml
 ./poc/cve/CVE-2025-3404-ffabe96ec7250fc9b334d8b9b9bd748e.yaml
 ./poc/cve/CVE-2025-34040.yaml
+./poc/cve/CVE-2025-34077.yaml
 ./poc/cve/CVE-2025-34085.yaml
 ./poc/cve/CVE-2025-34141.yaml
+./poc/cve/CVE-2025-34143.yaml
 ./poc/cve/CVE-2025-3415.yaml
 ./poc/cve/CVE-2025-3417-1d6a9664ecd54a09078e61fac0c7dcdd.yaml
 ./poc/cve/CVE-2025-3418-0aa49a393e7dc8d08134f92ab4c73898.yaml
