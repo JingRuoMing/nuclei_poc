@@ -120273,6 +120273,7 @@
 ./poc/detect/dnssec-detection_5.yaml
 ./poc/detect/dnt-policy-detect.yaml
 ./poc/detect/dnt-policy-detect_1.yaml
+./poc/detect/dnt-policy-detect_2.yaml
 ./poc/detect/docker-api-detection.yaml
 ./poc/detect/dolibarr-detect-7069.yaml
 ./poc/detect/dolibarr-detect-7071.yaml
@@ -128555,6 +128556,7 @@
 ./poc/java/tomcat-detect-10794.yaml
 ./poc/java/tomcat-detect.yaml
 ./poc/java/tomcat-detect_1.yaml
+./poc/java/tomcat-directory-listing.yaml
 ./poc/java/tomcat-exposed-docs.yaml
 ./poc/java/tomcat-exposed.yaml
 ./poc/java/tomcat-exposed_1.yaml
