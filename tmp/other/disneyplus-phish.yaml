@@ -1,0 +1,35 @@
+id: disneyplus-phish
+
+info:
+  name: disneyplus phishing Detection
+  author: rxerium
+  severity: info
+  description: |
+    A disneyplus phishing website was detected
+  reference:
+    - https://disneyplus.com
+  metadata:
+    max-request: 1
+  tags: phishing,disneyplus,osint
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    host-redirects: true
+    max-redirects: 2
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - 'Disney+ | Stream new Originals, blockbusters and series'
+
+      - type: status
+        status:
+          - 200
+
+      - type: dsl
+        dsl:
+          - '!contains(host,"disneyplus.com")'
+# digest: 490a00463044022062b77bb6d203971808a16949ef616aeb4dbbba6be7e339f14971d3ef1df0f39502201e32dcb3b3ccd13e5bf7d01886e7a05b8656ae29fe40f6f0b868fd923615263d:922c64590222798bb761d5b6d8e72950
