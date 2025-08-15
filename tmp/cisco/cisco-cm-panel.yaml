@@ -1,0 +1,31 @@
+id: cisco-cm-panel
+
+info:
+  name: Cisco Unified CM Console - Panel
+  author: rxerium
+  severity: info
+  reference:
+    - https://www.cisco.com/c/en_uk/products/unified-communications/unified-communications-manager-callmanager/index.html
+  description: |
+    Cisco Unified CM Console panel was discovered.
+  metadata:
+    max-request: 1
+    shodan-query: html:"/ccmadmin/"
+  tags: cisco,ciscocm,panel,login
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/ccmadmin/showHome.do"
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "<title>Cisco Unified CM Console"
+
+      - type: status
+        status:
+          - 200
+# digest: 4a0a00473045022100ccf34ce3b24d7ca40d5757bd6399ff005045ff41ff9917fb32ba21d386973a8a02205220e50b02ae8f187609e266f65048ce58cbf484283f03a21d67d3dbf3259722:922c64590222798bb761d5b6d8e72950

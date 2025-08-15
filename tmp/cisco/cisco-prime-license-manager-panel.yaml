@@ -1,0 +1,31 @@
+id: cisco-prime-license-manager-panel
+
+info:
+  name: Cisco Prime License Manager - Detect
+  author: rxerium
+  severity: info
+  reference:
+    - https://www.cisco.com/c/en/us/support/cloud-systems-management/prime-license-manager/series.html
+  description: |
+    Detected exposed Cisco Prime License Manager portals
+  metadata:
+    max-request: 1
+    shodan-query: http.title:"Cisco Prime License Manager"
+  tags: cisco,cisco-prime-license-manager,panel
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/elm-admin/"
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "<title>Cisco Prime License Manager"
+
+      - type: status
+        status:
+          - 200
+# digest: 4a0a00473045022003fe1c7aedb5c011fe159d7e334f48c2db58279976183dce1a1a7c1a4e3d3a99022100836b45255a38a7604c128169fe97f5b95738b7dacc1bdfab995cc4c18f12fb1d:922c64590222798bb761d5b6d8e72950
