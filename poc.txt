@@ -107539,7 +107539,9 @@
 ./poc/cve/CVE-2025-2524.yaml
 ./poc/cve/CVE-2025-2525-4a4f50c06f065498fee27362d9762e9c.yaml
 ./poc/cve/CVE-2025-25256-oob.yaml
+./poc/cve/CVE-2025-25256-oob_1.yaml
 ./poc/cve/CVE-2025-25256.yaml
+./poc/cve/CVE-2025-25256_1.yaml
 ./poc/cve/CVE-2025-25257.yaml
 ./poc/cve/CVE-2025-2526-ee91deed7e4def5f725289f1920525e0.yaml
 ./poc/cve/CVE-2025-2537.yaml
@@ -111736,6 +111738,7 @@
 ./poc/cve/CVE-2025-8212-284e87c6140e5a005ea4bf2baaf80f1a.yaml
 ./poc/cve/CVE-2025-8216-d4d3cdc25678600f8c9407e407487768.yaml
 ./poc/cve/CVE-2025-8286.yaml
+./poc/cve/CVE-2025-8286_1.yaml
 ./poc/cve/CVE-2025-8294-e4c78efc7ec90c2f4ff353d9d0f9a44c.yaml
 ./poc/cve/CVE-2025-8313-4f4f735b73530a8454f3a3184a3202af.yaml
 ./poc/cve/CVE-2025-8314-2a12ae460f51d0d606dffb916bc2c37d.yaml
@@ -122048,6 +122051,7 @@
 ./poc/detect/iqmessenger-detect_1.yaml
 ./poc/detect/iqmessenger-detect_1_1.yaml
 ./poc/detect/iqmessenger-detect_2.yaml
+./poc/detect/iqmessenger-detect_3.yaml
 ./poc/detect/irmc-detect.yaml
 ./poc/detect/irmc-detect_1.yaml
 ./poc/detect/ispyconnect-detect.yaml
@@ -123566,6 +123570,7 @@
 ./poc/detect/teltonika-detect.yaml
 ./poc/detect/teltonika-detect_1.yaml
 ./poc/detect/teltonika-detect_1_1.yaml
+./poc/detect/teltonika-detect_2.yaml
 ./poc/detect/terraform-detect-10706.yaml
 ./poc/detect/terraform-detect-10706_1.yaml
 ./poc/detect/terraform-detect-10707.yaml
@@ -123612,6 +123617,7 @@
 ./poc/detect/tool-detect.yaml
 ./poc/detect/tool-detect_1.yaml
 ./poc/detect/tools4ever-helloid-detect.yaml
+./poc/detect/tools4ever-helloid-detect_1.yaml
 ./poc/detect/topdesk-detect.yaml
 ./poc/detect/topdesk-detect_1.yaml
 ./poc/detect/topdesk-detect_1_1.yaml
@@ -133782,6 +133788,9 @@
 ./poc/microsoft/microsoft-phish_9.yaml
 ./poc/microsoft/microsoft-phish_9_1.yaml
 ./poc/microsoft/microsoft-runtime-error.yaml
+./poc/microsoft/microsoft-sharepoint-amsi.yaml
+./poc/microsoft/microsoft-sharepoint-favicon.yaml
+./poc/microsoft/microsoft-sharepoint-version.yaml
 ./poc/microsoft/microsoft-silverlight.yaml
 ./poc/microsoft/microsoft-skype-for-business.yaml
 ./poc/microsoft/microsoft-teams-phish.yaml
@@ -133806,6 +133815,7 @@
 ./poc/microsoft/microsoft-teams-webhook-8858.yaml
 ./poc/microsoft/microsoft-teams-webhook.yaml
 ./poc/microsoft/microsoft-teams-webhook_1.yaml
+./poc/microsoft/microsoft-tunnel-detect.yaml
 ./poc/microsoft/mightyforms-29983d9146384be621b7b03b0b101b56.yaml
 ./poc/microsoft/mightyforms.yaml
 ./poc/microsoft/mightyforms_1.yaml
@@ -133857,6 +133867,7 @@
 ./poc/microsoft/ms-sql-brute.yaml
 ./poc/microsoft/ms-sql-brute_1.yaml
 ./poc/microsoft/ms-sql-detect.yaml
+./poc/microsoft/msafe-panel.yaml
 ./poc/microsoft/msf-ai-ahent.yaml
 ./poc/microsoft/mshift.yaml
 ./poc/microsoft/mshop-mysite-476ee02a3de040690a5d24933c3885b8.yaml
@@ -147593,6 +147604,7 @@
 ./poc/other/citrix-hypervisor-page_3.yaml
 ./poc/other/citrix-metaframe.yaml
 ./poc/other/citrix-netscaler-releasedate.yaml
+./poc/other/citrix-netscaler-releasedate_1.yaml
 ./poc/other/citrix-oob-memory-read.yaml
 ./poc/other/citrix-oob-memory-read_1.yaml
 ./poc/other/citrix-oob-memory-read_2.yaml
@@ -150711,6 +150723,7 @@
 ./poc/other/cryptocurrency_3.yaml
 ./poc/other/cryptographic-failures.yaml
 ./poc/other/cryptographic-failures_1.yaml
+./poc/other/cryptshare-panel.yaml
 ./poc/other/crywolf.yaml
 ./poc/other/cs-element-bucket-edeb559f75956acfb53053640e0bbb5f.yaml
 ./poc/other/cs-element-bucket.yaml
@@ -159561,6 +159574,7 @@
 ./poc/other/fortinet-fortimanager-panel_1.yaml
 ./poc/other/fortinet-fortimanager-panel_2.yaml
 ./poc/other/fortinet-fortimanager-panel_3.yaml
+./poc/other/fortinet-fortimanager-panel_4.yaml
 ./poc/other/fortinet-fortinac-panel.yaml
 ./poc/other/fortinet-fortinac-panel_1.yaml
 ./poc/other/fortinet-fortinac-panel_2.yaml
@@ -159599,6 +159613,7 @@
 ./poc/other/fortisiem-panel.yaml
 ./poc/other/fortisiem-panel_1.yaml
 ./poc/other/fortisiem-panel_2.yaml
+./poc/other/fortisiem-panel_3.yaml
 ./poc/other/fortiswitch-certificate.yaml
 ./poc/other/fortiswitch-panel.yaml
 ./poc/other/fortiswitch-panel_1.yaml
@@ -159682,6 +159697,7 @@
 ./poc/other/founder-all-media-editing-system.yaml
 ./poc/other/founder-operation-management-and-decision-support-system.yaml
 ./poc/other/founder-xinwencaibian-imageProxy-download.yaml
+./poc/other/foundry-virtual-tabletop-panel.yaml
 ./poc/other/fourseasonsvpn.yaml
 ./poc/other/foursquare-checkins-e1e1a92249da54658e2d3da41734b08d.yaml
 ./poc/other/foursquare-checkins.yaml
@@ -163350,6 +163366,7 @@
 ./poc/other/huawei-hg532e-panel_1.yaml
 ./poc/other/huawei-hg532e-panel_2.yaml
 ./poc/other/huawei-holosense-panel.yaml
+./poc/other/huawei-holosense-panel_1.yaml
 ./poc/other/huawei-home-gateway-8072.yaml
 ./poc/other/huawei-home-gateway-8072_1.yaml
 ./poc/other/huawei-home-gateway.yaml
@@ -165360,6 +165377,7 @@
 ./poc/other/ivanti-connect-secure-panel.yaml
 ./poc/other/ivanti-connect-secure-panel_1.yaml
 ./poc/other/ivanti-connect-secure-panel_2.yaml
+./poc/other/ivanti-connect-secure-panel_3.yaml
 ./poc/other/ivanti-csa-panel.yaml
 ./poc/other/ivanti-csa-panel_1.yaml
 ./poc/other/ivanti-csa-panel_1_1.yaml
@@ -165382,6 +165400,7 @@
 ./poc/other/ivanti-endpoint-manager.yaml
 ./poc/other/ivanti-epmm-date-version.yaml
 ./poc/other/ivanti-epmm-date-version_1.yaml
+./poc/other/ivanti-epmm-date-version_2.yaml
 ./poc/other/ivanti-traffic-manager-panel.yaml
 ./poc/other/ivanti-traffic-manager-panel_1.yaml
 ./poc/other/ivanti-traffic-manager-panel_1_1.yaml
@@ -169449,6 +169468,7 @@
 ./poc/other/manageengine-desktop_2_1.yaml
 ./poc/other/manageengine-desktop_3.yaml
 ./poc/other/manageengine-deviceexpert.yaml
+./poc/other/manageengine-exchangereporter-panel.yaml
 ./poc/other/manageengine-exchangereporter.yaml
 ./poc/other/manageengine-opmanager-8765.yaml
 ./poc/other/manageengine-opmanager-8765_1.yaml
@@ -169907,6 +169927,7 @@
 ./poc/other/matrix-pre-loader_1.yaml
 ./poc/other/matrix-pre-loader_2.yaml
 ./poc/other/mattermost-panel.yaml
+./poc/other/mattermost-panel_1.yaml
 ./poc/other/mautic-crm-panel-8789.yaml
 ./poc/other/mautic-crm-panel-8789_1.yaml
 ./poc/other/mautic-crm-panel.yaml
@@ -170012,6 +170033,7 @@
 ./poc/other/mechat-irc.yaml
 ./poc/other/mechat-online-service.yaml
 ./poc/other/meddream-dicom-viewer-panel.yaml
+./poc/other/meddream-dicom-viewer-panel_1.yaml
 ./poc/other/media-alt-renamer-a0183f0e611140621fb2e0426ced2243.yaml
 ./poc/other/media-alt-renamer.yaml
 ./poc/other/media-alt-renamer_1.yaml
@@ -171180,6 +171202,7 @@
 ./poc/other/misp-panel_4.yaml
 ./poc/other/misp-panel_4_1.yaml
 ./poc/other/misp-panel_5.yaml
+./poc/other/misp-panel_6.yaml
 ./poc/other/missing-csp.yaml
 ./poc/other/missing-csp_1.yaml
 ./poc/other/missing-csp_2.yaml
@@ -172407,6 +172430,7 @@
 ./poc/other/mypixs_1.yaml
 ./poc/other/mypixs_2.yaml
 ./poc/other/myq-panel.yaml
+./poc/other/myq-panel_1.yaml
 ./poc/other/myriad-632a5ddea5298a720fcb710fc2a8898b.yaml
 ./poc/other/myriad-b4d4d84a56520b39b530faa63e00a1f7.yaml
 ./poc/other/myriad-d41d8cd98f00b204e9800998ecf8427e.yaml
@@ -174741,6 +174765,7 @@
 ./poc/other/opennebula-panel_2_1.yaml
 ./poc/other/opennebula-panel_3.yaml
 ./poc/other/opennebula-panel_4.yaml
+./poc/other/opennebula-panel_5.yaml
 ./poc/other/opennemas.yaml
 ./poc/other/opennewsletter.yaml
 ./poc/other/openobserve-panel.yaml
@@ -175059,6 +175084,7 @@
 ./poc/other/osd-subscribe.yaml
 ./poc/other/osd-subscribe_1.yaml
 ./poc/other/osd-subscribe_2.yaml
+./poc/other/osgeo-geoserver-version.yaml
 ./poc/other/oshine-modules-785d411583414f69c5757eeaa00d04b0.yaml
 ./poc/other/oshine-modules-974812a9ebbf198c9b9940bdd11b1044.yaml
 ./poc/other/oshine-modules.yaml
@@ -175604,6 +175630,7 @@
 ./poc/other/paloalto-globalprotect-version-date_1.yaml
 ./poc/other/paloalto-globalprotect-version-date_2.yaml
 ./poc/other/paloalto-globalprotect.yaml
+./poc/other/paloaltonetworks-globalprotect-version.yaml
 ./poc/other/panabit-gateway.yaml
 ./poc/other/panabit-ixcache.yaml
 ./poc/other/panabit-panalog.yaml
@@ -175669,6 +175696,7 @@
 ./poc/other/papercut-ng-panel_2.yaml
 ./poc/other/papercut-ng-panel_3.yaml
 ./poc/other/papercut-ng-panel_4.yaml
+./poc/other/papercut-ng-panel_5.yaml
 ./poc/other/papercut.yaml
 ./poc/other/papercut_mf.yaml
 ./poc/other/papercut_ng.yaml
@@ -179254,6 +179282,7 @@
 ./poc/other/pta-member-directory.yaml
 ./poc/other/pta-member-directory_1.yaml
 ./poc/other/pterodactyl-panel.yaml
+./poc/other/pterodactyl-panel_1.yaml
 ./poc/other/ptr-fingerprint-9707.yaml
 ./poc/other/ptr-fingerprint-9707_1.yaml
 ./poc/other/ptr-fingerprint.yaml
@@ -188887,6 +188916,7 @@
 ./poc/other/surveys_1.yaml
 ./poc/other/surveys_2.yaml
 ./poc/other/suse-manager-panel.yaml
+./poc/other/suse-manager-panel_1.yaml
 ./poc/other/suyaxing-campus-management-system.yaml
 ./poc/other/sv-cpt-mc310_firmware.yaml
 ./poc/other/sv-provenexpert-fcf83d7a3c85a390f649070d5d04b65e.yaml
@@ -191273,6 +191303,7 @@
 ./poc/other/toolpage_1.yaml
 ./poc/other/toolpage_2.yaml
 ./poc/other/tools4ever-ssrpm-panel.yaml
+./poc/other/tools4ever-ssrpm-panel_1.yaml
 ./poc/other/tooltip-ck.yaml
 ./poc/other/tooltip-ck_1.yaml
 ./poc/other/top-10-00e5af69de9770786d94145ef6b03e60.yaml
@@ -191318,6 +191349,7 @@
 ./poc/other/topaccess-panel.yaml
 ./poc/other/topbar-id-for-elementor.yaml
 ./poc/other/topbar-id-for-elementor_1.yaml
+./poc/other/topdesk-panel.yaml
 ./poc/other/topquark-60aa2580f7256ea0f4baada3ad5090ae.yaml
 ./poc/other/topquark-67ce96eb97290b00c5919a918b3bcd33.yaml
 ./poc/other/topquark-d41d8cd98f00b204e9800998ecf8427e.yaml
@@ -191745,6 +191777,7 @@
 ./poc/other/trending_1.yaml
 ./poc/other/trending_2.yaml
 ./poc/other/trendmicro-apex-central-panel.yaml
+./poc/other/trendmicro-apex-central-panel_1.yaml
 ./poc/other/trendmicro-apexone-panel.yaml
 ./poc/other/trendmicro-apexone-panel_1.yaml
 ./poc/other/trendy-news-34d326736b0381de2c4d24b067a7f68a.yaml
@@ -194101,6 +194134,7 @@
 ./poc/other/versa-analytics-server_1.yaml
 ./poc/other/versa-analytics-server_2.yaml
 ./poc/other/versa-analytics-server_3.yaml
+./poc/other/versa-director-panel.yaml
 ./poc/other/versa-flexvnf-panel.yaml
 ./poc/other/versa-flexvnf-panel_1.yaml
 ./poc/other/versa-flexvnf-panel_2.yaml
@@ -196150,6 +196184,7 @@
 ./poc/other/willfar-interface-management-tool.yaml
 ./poc/other/wilmer.yaml
 ./poc/other/windows-admin-center-panel.yaml
+./poc/other/windows-admin-center-panel_1.yaml
 ./poc/other/windows-business-server.yaml
 ./poc/other/windows.yaml
 ./poc/other/windows_7.yaml
@@ -198301,6 +198336,7 @@
 ./poc/other/xxljob-panel_5.yaml
 ./poc/other/xxljob-panel_6.yaml
 ./poc/other/xxllnc-zaaksysteem-panel.yaml
+./poc/other/xxllnc-zaaksysteem-panel_1.yaml
 ./poc/other/yaaburnee-themes-2350d664ec1fe331870fd08b06ffa2aa.yaml
 ./poc/other/yaaburnee-themes-65ec87abe2543c5f0d9ccf5f269fc91b.yaml
 ./poc/other/yaaburnee-themes-d41d8cd98f00b204e9800998ecf8427e.yaml
@@ -220129,6 +220165,7 @@
 ./poc/ssh/erlang-otp-ssh-detect.yaml
 ./poc/ssh/erlang-otp-ssh-detect_1.yaml
 ./poc/ssh/erlang-otp-ssh-detect_1_1.yaml
+./poc/ssh/erlang-otp-ssh-detect_2.yaml
 ./poc/ssh/limit-ssh-group.yaml
 ./poc/ssh/limit-ssh-users-access.yaml
 ./poc/ssh/mikrotik-ssh-detect.yaml
@@ -223278,6 +223315,7 @@
 ./poc/web/eroom-zoom-meetings-webinar_2.yaml
 ./poc/web/eroom-zoom-meetings-webinar_3.yaml
 ./poc/web/espec-web-controller-panel.yaml
+./poc/web/espec-web-controller-panel_1.yaml
 ./poc/web/evse-web-panel.yaml
 ./poc/web/evse-web-panel_1.yaml
 ./poc/web/evse-web-panel_2.yaml
