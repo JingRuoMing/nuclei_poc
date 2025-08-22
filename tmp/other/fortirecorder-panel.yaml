@@ -1,0 +1,34 @@
+id: fortirecorder-panel
+
+info:
+  name: FortiRecorder Panel - Detect
+  author: rxerium
+  severity: info
+  description: |
+    FortiRecorder Panel was discovered.
+  reference:
+    - https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/FortiRecorder.pdf
+  metadata:
+    max-request: 1
+    verified: true
+    shodan-query: title:FortiRecorder
+    fofa-query: title="FortiRecorder"
+  tags: fortinet,fortirecorder,login,panel
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/admin/"
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - "FortiRecorder Admin"
+          - "Log In"
+        condition: and
+
+      - type: status
+        status:
+          - 200
+# digest: 4a0a00473045022100810c4a77aa47333db728afb931267fa4643548ea72403c4419b588e358ffd05302200565ca219f4a69a1be9ec6f9638db8c3504b67fb95f3d4db9e8eafa5aebc8b78:922c64590222798bb761d5b6d8e72950
