@@ -1,0 +1,32 @@
+id: ivanti-traffic-manager-panel
+
+info:
+  name: Ivanti Traffic Manager Panel - Detect
+  author: rxerium
+  severity: info
+  description: |
+    An Ivanti Traffic Manager Login Panel was detected.
+  reference:
+    - https://www.ivanti.com/resources/v/doc/ivi/2528/2ef03e8ed03d
+  metadata:
+    verified: true
+    max-request: 1
+    shodan-query: http.html:"Login (Virtual Traffic Manager"
+  tags: detect,traffic-manager,panel,login
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/apps/zxtm/login.cgi"
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "Login (Virtual Traffic Manager"
+
+      - type: status
+        status:
+          - 200
+# digest: 4b0a004830460221008937b2e73885f34d054839f5d76992232a047e025f36891bc758cf27c448f12a022100b05514a63cff7a89481e003d25d5ffc675ffab2ee694f105e980a18f3a57ebad:922c64590222798bb761d5b6d8e72950
