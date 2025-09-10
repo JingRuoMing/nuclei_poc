@@ -1,0 +1,31 @@
+id: onion-website-supported
+
+info:
+  name: Onion Website Supported via Onion-Location Header
+  author: rxerium
+  severity: info
+  description: |
+    Identified websites that supported Tor network access through the Onion-Location HTTP response header, which pointed to a corresponding .onion service for enhanced privacy and anonymity.
+  metadata:
+    verified: true
+    max-request: 1
+  tags: misc,osint,tor,onion
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: regex
+        part: header
+        regex:
+          - '(?i)onion-location:\s*https?://[a-z0-9]+\.onion'
+
+    extractors:
+      - type: regex
+        part: header
+        group: 1
+        regex:
+          - '(?i)onion-location:\s*(https?://[a-z0-9]+\.onion)'
+# digest: 4a0a00473045022100ddc0750ede1cc4e5411fed44ef0800b6ba2c5e8c0d620d76bcabac563a92904b02204f48d2355e3a263affef37b96eea72d170a5d14e08185b0af75ef65460be2ee1:922c64590222798bb761d5b6d8e72950
