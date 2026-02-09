@@ -34,6 +34,37 @@ jobs:
       - run: cargo fmt --check
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test
+      - name: Run WASM type tests (native)
+        run: cargo test --features wasm --lib -- wasm_types
+
+  verify-stubs:
+    name: Verify Python stubs
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: extensions/rust
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate stubs and check for drift
+        run: |
+          pip install ruff==0.14.14
+          python scripts/generate_stubs.py
+          ruff check --fix python/ferrox
+          ruff format python/ferrox
+          if ! git diff --exit-code python/ferrox; then
+            echo "::error::Python stubs are out of sync with Rust code!"
+            echo "Please run 'python scripts/generate_stubs.py' and commit the changes."
+            git diff python/ferrox
+            exit 1
+          fi
+          echo "Stubs are up to date!"
 
   python-tests:
     runs-on: ubuntu-latest
@@ -93,6 +124,17 @@ jobs:
         run: |
           pnpm install
           pnpm test
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: 2.3.7
+      - name: Verify WASM types are up to date
+        run: |
+          deno run -A extensions/rust/wasm/generate_types.ts
+          deno fmt --config deno.jsonc extensions/rust/wasm/types.d.ts
+          if ! git diff --exit-code extensions/rust/wasm/types.d.ts; then
+            echo "::error::WASM types.d.ts is out of sync! Run 'deno run -A generate_types.ts' and commit."
+            exit 1
+          fi
       - name: Upload WASM artifact
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
@@ -131,7 +173,7 @@ jobs:
           fi
 
   build-wheels:
-    needs: [rust-tests, python-tests, wasm-tests, check-version]
+    needs: [rust-tests, python-tests, wasm-tests, verify-stubs, check-version]
     if: needs.check-version.outputs.should_publish_pypi == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
@@ -160,7 +202,7 @@ jobs:
           path: ${{ env.WORKING_DIR }}/dist
 
   build-sdist:
-    needs: [rust-tests, python-tests, wasm-tests, check-version]
+    needs: [rust-tests, python-tests, wasm-tests, verify-stubs, check-version]
     if: needs.check-version.outputs.should_publish_pypi == 'true'
     runs-on: ubuntu-latest
     steps:
