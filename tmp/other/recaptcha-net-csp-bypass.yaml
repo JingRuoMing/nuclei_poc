@@ -1,30 +1,14 @@
 id: recaptcha-net-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass - reCAPTCHA Net
+  name: Content-Security-Policy Bypass via reCAPTCHA Net
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,recaptcha-net,vuln
-
-flow: http(1) && headless(1)
-
-http:
-  - method: GET
-    path:
-      - "{{BaseURL}}"
-
-    matchers:
-      - type: word
-        part: header
-        words:
-          - "Content-Security-Policy"
-          - "google.com"
-        condition: and
-        internal: true
+  tags: xss,csp-bypass,recaptcha-net
 
 headless:
   - steps:
@@ -52,4 +36,4 @@ headless:
       - type: dsl
         dsl:
           - "recaptcha_net_csp_xss == true"
-# digest: 490a00463044022053ca6e69bd2a4c76fd21d2db43ebc4083987a9e2f1c3d80f9394cb95fc26baf902200c28b7898d43affb7823b5179cef86b7cbb03073fc127fd6d9f2708f5caeef59:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a004730450221009b143f489ab466b2c8edad1dc1bd7920173984c5d36c7d0fd24cffb1c5f6502802203e0d7b34f9b4c8bc245862879d05038d066aba81f5ee8794387f2cd4905c5b6f:922c64590222798bb761d5b6d8e72950

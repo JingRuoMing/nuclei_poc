@@ -1,30 +1,14 @@
 id: criteo-dynamic-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass - Criteo Dynamic
+  name: Content-Security-Policy Bypass via Criteo Dynamic
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,criteo-dynamic,vuln
-
-flow: http(1) && headless(1)
-
-http:
-  - method: GET
-    path:
-      - "{{BaseURL}}"
-
-    matchers:
-      - type: word
-        part: header
-        words:
-          - "Content-Security-Policy"
-          - "criteo.com"
-        condition: and
-        internal: true
+  tags: xss,csp-bypass,criteo-dynamic
 
 headless:
   - steps:
@@ -52,4 +36,4 @@ headless:
       - type: dsl
         dsl:
           - "criteo_dynamic_csp_xss == true"
-# digest: 4b0a00483046022100bdcf869ed3c85e6d80afdb5a719700c3a3428d2953c2378256f2dab295b33639022100abb8f5f461e147c87ad5074ec825ca6983d6e3d4e05dfbcf86f99c9fac83c8e9:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a00483046022100aadb24d1a555545ebced07e8893ee881c7fe16e2d0a3dee488a09d451ea41da7022100efeb868e1ba52869ad859fd49074e7a8c92423d4b3027a83ddf8f5df24e23214:922c64590222798bb761d5b6d8e72950

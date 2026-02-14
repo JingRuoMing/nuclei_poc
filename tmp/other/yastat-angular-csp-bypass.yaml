@@ -1,30 +1,14 @@
 id: yastat-angular-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass - Yastat Angular
+  name: Content-Security-Policy Bypass via Yastat Angular
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,yastat-angular,vuln
-
-flow: http(1) && headless(1)
-
-http:
-  - method: GET
-    path:
-      - "{{BaseURL}}"
-
-    matchers:
-      - type: word
-        part: header
-        words:
-          - "Content-Security-Policy"
-          - "yastat.net"
-        condition: and
-        internal: true
+  tags: xss,csp-bypass,yastat-angular
 
 headless:
   - steps:
@@ -52,4 +36,4 @@ headless:
       - type: dsl
         dsl:
           - "yastat_angular_csp_xss == true"
-# digest: 490a0046304402202c92bd535c1f747a70fa64d89aa5da84c18434e561e0ec40ea3bde96a880568002202b3bdfe1752c71ef38e78f9afccdcb04033c9493e0aeb2f5c14ad637b2dbe7fa:922c64590222798bb761d5b6d8e72950
+# digest: 490a0046304402201f279d5b41da6d0ac8b9810d76262ce0b0c1eee8175ec4f1a503495043bce1e002203b97e23558fc97eb182f688256c42f813856ab7dedb20d51395fa4eb9197d4dd:922c64590222798bb761d5b6d8e72950

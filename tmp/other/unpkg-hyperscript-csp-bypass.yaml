@@ -1,30 +1,14 @@
 id: unpkg-hyperscript-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass - Unpkg Hyperscript
+  name: Content-Security-Policy Bypass via Unpkg Hyperscript
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,unpkg-hyperscript,vuln
-
-flow: http(1) && headless(1)
-
-http:
-  - method: GET
-    path:
-      - "{{BaseURL}}"
-
-    matchers:
-      - type: word
-        part: header
-        words:
-          - "Content-Security-Policy"
-          - "unpkg.com"
-        condition: and
-        internal: true
+  tags: xss,csp-bypass,unpkg-hyperscript
 
 headless:
   - steps:
@@ -52,4 +36,4 @@ headless:
       - type: dsl
         dsl:
           - "unpkg_hyperscript_csp_xss == true"
-# digest: 4a0a0047304502205e875371e1956deccbcac5e0c24d53773248984105df0809c5d9e547db5365e8022100877ebd63030f3e06ce200630769edc4e6afecbc1fb67388c49cf87a77ed2afc1:922c64590222798bb761d5b6d8e72950
+# digest: 490a0046304402202bc40a6638a7919d0fccd2c1ef0e88fe039bd0b2f11c6d9578309634e6ba3d3d02204e9e2db1a80fea8b2038c6a0e3552a3e7509b733815821943362dbefa713bd39:922c64590222798bb761d5b6d8e72950

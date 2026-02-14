@@ -1,30 +1,14 @@
 id: bdimg-apps-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass - BDImg Apps
+  name: Content-Security-Policy Bypass via BDImg Apps
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,bdimg-apps,vuln
-
-flow: http(1) && headless(1)
-
-http:
-  - method: GET
-    path:
-      - "{{BaseURL}}"
-
-    matchers:
-      - type: word
-        part: header
-        words:
-          - "Content-Security-Policy"
-          - "bdimg.com"
-        condition: and
-        internal: true
+  tags: xss,csp-bypass,bdimg-apps
 
 headless:
   - steps:
@@ -52,4 +36,4 @@ headless:
       - type: dsl
         dsl:
           - "bdimg_apps_csp_xss == true"
-# digest: 490a0046304402204bc1a5d76a800c3343590c9b218eabc4179a9a75aed7aca1ff3ff60cdd9198ca02207d8e79d891b58f0fcc20430600932f7a7cf432960e821e14586690fd74bc0554:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a00473045022005addc99f5ebd88cde80f596c40542b20f541e7c2948e544068debb6fab12cea022100f724fae9b2333e944b7d9f4e01caead86a5a6670bdea233686fc6f61a9dde171:922c64590222798bb761d5b6d8e72950
