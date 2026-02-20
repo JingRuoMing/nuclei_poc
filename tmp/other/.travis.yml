@@ -1,17 +1,12 @@
 language: go
-go:
-    - 1.9.x
-    - 1.10.x
-    - 1.11.x
 
-before_install:
-    - go get -t -v ./...
+go:
+  - 1.6
+  - 1.9
+  - '1.10'
 
 install:
-    - go get github.com/xtaci/kcp-go
+  - go get github.com/mattn/goveralls
 
 script:
-    - go test -coverprofile=coverage.txt -covermode=atomic -bench .
-
-after_success:
-    - bash <(curl -s https://codecov.io/bash)
+  - $HOME/gopath/bin/goveralls -service=travis-ci

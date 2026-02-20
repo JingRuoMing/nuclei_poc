@@ -1,141 +1,125 @@
-# This is an example goreleaser.yaml file with some sane defaults.
-# Make sure to check the documentation at http://goreleaser.com
+version: 2
+
 before:
   hooks:
-    - ./gen.sh
-    - go install mvdan.cc/garble@v0.9.3
+    - go mod download
+    - go mod verify
 
 builds:
-  -
-    id: "s2c"
-    binary: s2c
-    main: ./s2/cmd/s2c/main.go
-    flags:
-      - -trimpath
+  - main: cmd/nuclei/main.go
+    binary: nuclei
+    id: nuclei-cli
     env:
       - CGO_ENABLED=0
-    goos:
-      - aix
-      - linux
-      - freebsd
-      - netbsd
-      - windows
-      - darwin
-    goarch:
-      - 386
-      - amd64
-      - arm
-      - arm64
-      - ppc64
-      - ppc64le
-      - mips64
-      - mips64le
-    goarm:
-      - 7
-    gobinary: garble
-  -
-    id: "s2d"
-    binary: s2d
-    main: ./s2/cmd/s2d/main.go
+      - GOEXPERIMENT=greenteagc
+    goos: [windows, linux, darwin]
+    goarch: [amd64, '386', arm, arm64]
+    ignore:
+      - goos: darwin
+        goarch: '386'
+      - goos: windows
+        goarch: arm
+      - goos: windows
+        goarch: arm64
     flags:
       - -trimpath
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - aix
-      - linux
-      - freebsd
-      - netbsd
-      - windows
-      - darwin
-    goarch:
-      - 386
-      - amd64
-      - arm
-      - arm64
-      - ppc64
-      - ppc64le
-      - mips64
-      - mips64le
-    goarm:
-      - 7
-    gobinary: garble
-  -
-    id: "s2sx"
-    binary: s2sx
-    main: ./s2/cmd/_s2sx/main.go
-    flags:
-      - -modfile=s2sx.mod
-      - -trimpath
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - aix
-      - linux
-      - freebsd
-      - netbsd
-      - windows
-      - darwin
-    goarch:
-      - 386
-      - amd64
-      - arm
-      - arm64
-      - ppc64
-      - ppc64le
-      - mips64
-      - mips64le
-    goarm:
-      - 7
-    gobinary: garble
+      - -pgo=auto
+    ldflags:
+      - -s
+      - -w
+
+#- main: cmd/tmc/main.go
+#  binary: tmc
+#  id: annotate
+#
+#  env:
+#  - CGO_ENABLED=0
+#
+#  goos: [linux]
+#  goarch: [amd64]
 
 archives:
-  -
-    id: s2-binaries
-    name_template: "s2-{{ .Os }}_{{ .Arch }}_{{ .Version }}"
-    replacements:
-      aix: AIX
-      darwin: OSX
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
-      freebsd: FreeBSD
-      netbsd: NetBSD
-    format_overrides:
-      - goos: windows
-        format: zip
-    files:
-      - unpack/*
-      - s2/LICENSE
-      - s2/README.md
-checksum:
-  name_template: 'checksums.txt'
-snapshot:
-  name_template: "{{ .Tag }}-next"
-changelog:
-  sort: asc
-  filters:
-    exclude:
-    - '^doc:'
-    - '^docs:'
-    - '^test:'
-    - '^tests:'
-    - '^Update\sREADME.md'
+  - formats: [zip]
+    id: nuclei
+    ids: [nuclei-cli]
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}'
 
-nfpms:
-  -
-    file_name_template: "s2_package_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    vendor: Klaus Post
-    homepage: https://github.com/klauspost/compress
-    maintainer: Klaus Post <klauspost@gmail.com>
-    description: S2 Compression Tool
-    license: BSD 3-Clause
-    formats:
-      - deb
-      - rpm
-    replacements:
-      darwin: Darwin
-      linux: Linux
-      freebsd: FreeBSD
-      amd64: x86_64
+checksum:
+  algorithm: sha256
+
+dockers:
+  - image_templates:
+      - "projectdiscovery/{{ .ProjectName }}:{{ .Tag }}-amd64"
+      - "projectdiscovery/{{ .ProjectName }}:v{{ .Major }}.{{ .Minor }}-amd64"
+      - "projectdiscovery/{{ .ProjectName }}:v{{ .Major }}-amd64"
+      - "projectdiscovery/{{ .ProjectName }}:latest-amd64"
+    dockerfile: Dockerfile.goreleaser
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.ref.name={{ .Tag }}"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+    goarch: amd64
+  - image_templates:
+      - "projectdiscovery/{{ .ProjectName }}:{{ .Tag }}-arm64"
+      - "projectdiscovery/{{ .ProjectName }}:v{{ .Major }}.{{ .Minor }}-arm64"
+      - "projectdiscovery/{{ .ProjectName }}:v{{ .Major }}-arm64"
+      - "projectdiscovery/{{ .ProjectName }}:latest-arm64"
+    dockerfile: Dockerfile.goreleaser
+    use: buildx
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.ref.name={{ .Tag }}"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+    goarch: arm64
+  # # NOTE(dwisiswant0): chromium doesn't support 32-bit on alpine
+  # - image_templates:
+  #     - "projectdiscovery/{{ .ProjectName }}:{{ .Tag }}-386"
+  #     - "projectdiscovery/{{ .ProjectName }}:v{{ .Major }}.{{ .Minor }}-386"
+  #     - "projectdiscovery/{{ .ProjectName }}:v{{ .Major }}-386"
+  #     - "projectdiscovery/{{ .ProjectName }}:latest-386"
+  #   dockerfile: Dockerfile.goreleaser
+  #   use: buildx
+  #   build_flag_templates:
+  #     - "--pull"
+  #     - "--platform=linux/386"
+  #     - "--label=org.opencontainers.image.created={{ .Date }}"
+  #     - "--label=org.opencontainers.image.ref.name={{ .Tag }}"
+  #     - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+  #     - "--label=org.opencontainers.image.version={{ .Version }}"
+  #   goarch: "386"
+
+docker_manifests:
+  - name_template: "projectdiscovery/{{ .ProjectName }}:{{ .Tag }}"
+    image_templates:
+      - "projectdiscovery/{{ .ProjectName }}:{{ .Tag }}-amd64"
+      - "projectdiscovery/{{ .ProjectName }}:{{ .Tag }}-arm64"
+  - name_template: "projectdiscovery/{{ .ProjectName }}:v{{ .Major }}.{{ .Minor }}"
+    image_templates:
+      - "projectdiscovery/{{ .ProjectName }}:v{{ .Major }}.{{ .Minor }}-amd64"
+      - "projectdiscovery/{{ .ProjectName }}:v{{ .Major }}.{{ .Minor }}-arm64"
+  - name_template: "projectdiscovery/{{ .ProjectName }}:v{{ .Major }}"
+    image_templates:
+      - "projectdiscovery/{{ .ProjectName }}:v{{ .Major }}-amd64"
+      - "projectdiscovery/{{ .ProjectName }}:v{{ .Major }}-arm64"
+  - name_template: "projectdiscovery/{{ .ProjectName }}:latest"
+    image_templates:
+      - "projectdiscovery/{{ .ProjectName }}:latest-amd64"
+      - "projectdiscovery/{{ .ProjectName }}:latest-arm64"
+
+announce:
+  slack:
+    enabled: true
+    channel: '#release'
+    username: GoReleaser
+    message_template: 'New Release: {{ .ProjectName }} {{.Tag}} is published! Check it out at {{ .ReleaseURL }}'
+
+  discord:
+    enabled: true
+    message_template: '**New Release: {{ .ProjectName }} {{.Tag}}** is published! Check it out at {{ .ReleaseURL }}'

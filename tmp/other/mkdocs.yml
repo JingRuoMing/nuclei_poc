@@ -1,58 +1,107 @@
-site_name: Nuclei Studio Supply Documents
-docs_dir: docs
-repo_url: https://github.com/Nuclei-Software/nuclei-studio
-edit_uri: blob/main/
-copyright: All rights reserved
+# NOTE: the mkdocs dependencies will need to be installed out of
+# band until this whole thing gets more automated:
+#
+#     pip install -r mkdocs-requirements.txt
+#
+
+site_name: urfave/cli
+site_url: https://cli.urfave.org/
+repo_url: https://github.com/urfave/cli
+edit_uri: edit/main/docs/
 nav:
-    - Home: README.md
-    - 1-cannot-setup-guestmemory.md
-    - 2-qemu-glib-gio-unexpectedly.md
-    - 3-print_memor_usage_in_ide.md
-    - 4-use_pre_build_or_post_build.md
-    - 5-update_npk_to_support_nucleistudio_202310.md
-    - 6-gcc13_gen_rvv_instructions_when_rvv_enabled.md
-    - 7-update_nucleistudio_202310_to_fixed_version.md
-    - 8-openocd_202310_flashloader_flaws.md
-    - 9-modify_the_cproject_file_to_change_the_project_to_gcc13.md
-    - 10-compiling_projects_with_headless_in_nuclei_studio.md
-    - 11-openocd_reported_error_not_known_as_fespi_capable.md
-    - 12-nucleisdk-0.5.0-dhrystone-score-lower-than-expected-in-IDE.md
-    - 13-error_could_not_find_an_available_hardware_trigger.md
-    - 14-cannot_find_-lncrt_balanced_no_such_file_or_directory.md
-    - 15-unsatisfiedLinkError_of_swt-win32-4965r8_dll_on_windows7.md
-    - 16-incomplete_data_output_when_using_profiling_function.md
-    - 17-an_example_to_demonstrate_the_use_of_profiling_and_code_coverage.md
-    - 18-demonstrate_NICE_VNICE_acceleration_of_the_Nuclei_Model_through_profiling.md
-    - 19-rapid_verification_of_NICE_VNICE_acceleration_with_Nuclei_Model_and_NICE_Wizard.md
-    - 20-quick_downloads_using_flash_programming.md
-    - 21-livewatch_for_monitoring_variables.md
-    - 22-example_for_adding_new_instructions_in_llvm.md
-    - 23-nuclei_debug_map_register_analyze.md
-    - 24-example_for_adding_new_instructions_in_binutils.md
-    - 25-nuclei_cross_trigger_in_openocd.md
-    - 26-debugging_support_for_freertos_by_openocd.md
-    - 27-debug_with_multiple_ftdi_devices.md
-    - 28-quick_porting_from_evalsoc_to_customsoc_based_on_Nuclei_SDK.md
-    - 29-using_overlay_command_in_linker_scripts.md
-exclude_docs: |
-    0-*.md
+  - Home:
+      - Welcome: index.md
+      - Contributing: CONTRIBUTING.md
+      - Code of Conduct: CODE_OF_CONDUCT.md
+      - Releasing: RELEASING.md
+      - Security: SECURITY.md
+      - Migrate v1 to v2: migrate-v1-to-v2.md
+  - v2 Manual:
+      - Getting Started: v2/getting-started.md
+      - Migrating From Older Releases: v2/migrating-from-older-releases.md
+      - Examples:
+          - Greet: v2/examples/greet.md
+          - Arguments: v2/examples/arguments.md
+          - Flags: v2/examples/flags.md
+          - Subcommands: v2/examples/subcommands.md
+          - Subcommands Categories: v2/examples/subcommands-categories.md
+          - Exit Codes: v2/examples/exit-codes.md
+          - Combining Short Options: v2/examples/combining-short-options.md
+          - Bash Completions: v2/examples/bash-completions.md
+          - Generated Help Text: v2/examples/generated-help-text.md
+          - Version Flag: v2/examples/version-flag.md
+          - Timestamp Flag: v2/examples/timestamp-flag.md
+          - Suggestions: v2/examples/suggestions.md
+          - Full API Example: v2/examples/full-api-example.md
+  - v1 Manual:
+      - Getting Started: v1/getting-started.md
+      - Migrating to v2: v1/migrating-to-v2.md
+      - Examples:
+          - Greet: v1/examples/greet.md
+          - Arguments: v1/examples/arguments.md
+          - Flags: v1/examples/flags.md
+          - Subcommands: v1/examples/subcommands.md
+          - Subcommands (Categories): v1/examples/subcommands-categories.md
+          - Exit Codes: v1/examples/exit-codes.md
+          - Combining Short Options: v1/examples/combining-short-options.md
+          - Bash Completions: v1/examples/bash-completions.md
+          - Generated Help Text: v1/examples/generated-help-text.md
+          - Version Flag: v1/examples/version-flag.md
+
 theme:
-   name: readthedocs
-   highlightjs: true
-   locale: zh
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-4
+        name: dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-7
+        name: light mode
+  features:
+    - content.code.annotate
+    - navigation.top
+    - navigation.instant
+    - navigation.expand
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
 plugins:
-  - mkpdfs:
-      author: "Nuclei Software"
-      company: "Nuclei System Technology"
-      toc_title: Table of contents
-      output_path: pdf/nuclei_studio_supply.pdf
-      design: report.css
+  - git-revision-date-localized
+  - search
+  - tags
+# NOTE: this is the recommended configuration from
+# https://squidfunk.github.io/mkdocs-material/setup/extensions/#recommended-configuration
 markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - meta
+  - md_in_html
   - toc:
       permalink: true
-  - github-callouts
-  - codehilite
-  - pymdownx.magiclink
-# https://github.com/mkdocs/mkdocs-bootswatch/issues/65#issuecomment-1030505626
-extra_css:
-  - extra.css
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
