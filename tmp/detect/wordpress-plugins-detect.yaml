@@ -5,8 +5,8 @@ info:
   author: 0xcrypto
   severity: info
   metadata:
-    max-request: 100563
-  tags: fuzz,wordpress,fuzzing,vuln
+    max-request: 98135
+  tags: fuzz,wordpress
 
 http:
   - raw:
@@ -14,6 +14,7 @@ http:
         GET /wp-content/plugins/{{pluginSlug}}/readme.txt HTTP/1.1
         Host: {{Hostname}}
 
+    threads: 50
     payloads:
       pluginSlug: helpers/wordlists/wordpress-plugins.txt
 
@@ -34,4 +35,5 @@ http:
         regex:
           - "===\\s(.*)\\s===" # extract the plugin name
           - "(?m)Stable tag: ([0-9.]+)" # extract the plugin version
-# digest: 4a0a00473045022100c0e21976f02334a689b33f658f4f1379b266a93cac4b91548d7d413e88c8305302201ab69db4dd9b64f4088373b72b61523b7370bc946d4cc52dd753cba3bac9a558:922c64590222798bb761d5b6d8e72950
+
+# digest: 490a0046304402203dae0e85f594434c208f2bbb49a34444932fb2bbebfc79dd5927f3a559fc28840220779c3169c962d96c2f3e567212f7919cfc7df199c2b58bc160c12eb2ab74cc7e:922c64590222798bb761d5b6d8e72950

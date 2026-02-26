@@ -1,7 +1,7 @@
 id: wordpress-imagify
 
 info:
-  name: Imagify Image Optimization – Optimize Images | Compress Images | Convert WebP | Convert AVIF Detection
+  name: Imagify – Optimize Images & Convert WebP & AVIF | Compress Images Easily Detection
   author: ricardomaia
   severity: info
   reference:
@@ -9,7 +9,7 @@ info:
   metadata:
     plugin_namespace: imagify
     wpscan: https://wpscan.com/plugin/imagify
-  tags: tech,wordpress,wp-plugin,top-100,top-200,discovery
+  tags: tech,wordpress,wp-plugin,top-100,top-200
 
 http:
   - method: GET
@@ -46,4 +46,4 @@ http:
         part: body
         regex:
           - '(?i)Stable.tag:\s?([\w.]+)'
-# digest: 4a0a004730450220220aa92fba8527c15c72ec6cea0e144e4d2af29cb6fc4cfa496296e06a0e26be022100d9bc1306c2f98fe42030877e9f621e70c26e93d2850cd9a0000a6de97903821e:922c64590222798bb761d5b6d8e72950
+# digest: 490a00463044022039c8f9f26c7b29d42442c289a0ff194f4f4406a0656d1c70bb4b49ae02c3492b02203d085302341befc33de74092ae51deea764c20c84e15062e2b4ae4c6d536701f:922c64590222798bb761d5b6d8e72950

