@@ -1,14 +1,30 @@
 id: google-ajax-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass via Google AJAX
+  name: Content-Security-Policy Bypass - Google AJAX
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,google-ajax
+  tags: xss,csp-bypass,google-ajax,vuln
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "googleapis.com"
+        condition: and
+        internal: true
 
 headless:
   - steps:
@@ -36,4 +52,4 @@ headless:
       - type: dsl
         dsl:
           - "google_ajax_csp_xss == true"
-# digest: 4a0a00473045022100b8430f8cffdb03f4f53c80d60e9bb1d1f673ea33a620a2fa46eb86140b0592c10220297a797ff821d56a7444f79dd27442b114fb306256b0712846838930b52433f5:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a00483046022100a27ec0457142376ebae0ff6697874c5e58cdab2fca21a81cb8d8949016191e44022100d0ff4fc0b2ed7b1a2d207c02906298e3717ab5f5190f26b8d44e45600f906c7c:922c64590222798bb761d5b6d8e72950

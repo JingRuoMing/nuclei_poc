@@ -1,14 +1,30 @@
 id: wordpress-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass via WordPress
+  name: Content-Security-Policy Bypass - WordPress
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,wordpress
+  tags: xss,csp-bypass,wordpress,vuln
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "wordpress.org"
+        condition: and
+        internal: true
 
 headless:
   - steps:
@@ -36,4 +52,4 @@ headless:
       - type: dsl
         dsl:
           - "wordpress_csp_xss == true"
-# digest: 490a00463044022048f56efe38faf06ba964797bb7c52763c2ec15d50a5da2f9545ead0d6a2179b802204a93e39ee39f459d3aaf416c11896c252af2689b4a30311be9c666dc101732b1:922c64590222798bb761d5b6d8e72950
+# digest: 490a00463044022037003527089671e6cf97575c58a5b3a244c5d879a66b6f65c14f5a2f2a3a662802203dfac4cb260a3a4f067df5b744527e8741208c75ce616f16f19d4dd5d8dcad6a:922c64590222798bb761d5b6d8e72950

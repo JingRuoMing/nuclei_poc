@@ -1,14 +1,30 @@
 id: google-accounts-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass via Google Accounts
+  name: Content-Security-Policy Bypass - Google Accounts
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,google-accounts
+  tags: xss,csp-bypass,google-accounts,vuln
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "google.com"
+        condition: and
+        internal: true
 
 headless:
   - steps:
@@ -36,4 +52,4 @@ headless:
       - type: dsl
         dsl:
           - "google_accounts_csp_xss == true"
-# digest: 490a004630440220476150f132071fe900978756cd424a30e765c08ef7cb7943eeccd3312b16d5c102203785c5b8fb42347300225fb9934b86601ab4bd9bcf5043a94f92e9ba9e4071bb:922c64590222798bb761d5b6d8e72950
+# digest: 490a004630440220730c2eac1504c609e1ebc31b3144b8745de67fb39ee49118a12655c36e4bdd62022079a74a9052aea402bbcdd2c48ff65c9eca5d687c97b3f055477638f8c63a1d58:922c64590222798bb761d5b6d8e72950

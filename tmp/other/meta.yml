@@ -1,70 +1,35 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
-name: bam_sort_stats_samtools
-description: Sort SAM/BAM/CRAM file
+name: "utils_nfschema_plugin"
+description: Run nf-schema to validate parameters and create a summary of changed parameters
 keywords:
-  - sort
-  - bam
-  - sam
-  - cram
-components:
-  - samtools/sort
-  - samtools/index
-  - samtools/stats
-  - samtools/idxstats
-  - samtools/flagstat
-  - bam_stats_samtools
+  - validation
+  - JSON schema
+  - plugin
+  - parameters
+  - summary
+components: []
 input:
-  - meta:
-      type: map
+  - input_workflow:
+      type: object
       description: |
-        Groovy Map containing sample information
-        e.g. [ id:'test', single_end:false ]
-  - bam:
-      type: file
-      description: BAM/CRAM/SAM file
-      pattern: "*.{bam,cram,sam}"
-  - fasta:
-      type: file
-      description: Reference genome fasta file
-      pattern: "*.{fasta,fa}"
-# TODO Update when we decide on a standard for subworkflow docs
+        The workflow object of the used pipeline.
+        This object contains meta data used to create the params summary log
+  - validate_params:
+      type: boolean
+      description: Validate the parameters and error if invalid.
+  - parameters_schema:
+      type: string
+      description: |
+        Path to the parameters JSON schema.
+        This has to be the same as the schema given to the `validation.parametersSchema` config
+        option. When this input is empty it will automatically use the configured schema or
+        "${projectDir}/nextflow_schema.json" as default. The schema should not be given in this way
+        for meta pipelines.
 output:
-  - meta:
-      type: map
-      description: |
-        Groovy Map containing sample information
-        e.g. [ id:'test', single_end:false ]
-  - bam:
-      type: file
-      description: Sorted BAM/CRAM/SAM file
-      pattern: "*.{bam,cram,sam}"
-  - bai:
-      type: file
-      description: BAM/CRAM/SAM index file
-      pattern: "*.{bai,crai,sai}"
-  - crai:
-      type: file
-      description: BAM/CRAM/SAM index file
-      pattern: "*.{bai,crai,sai}"
-  - stats:
-      type: file
-      description: File containing samtools stats output
-      pattern: "*.{stats}"
-  - flagstat:
-      type: file
-      description: File containing samtools flagstat output
-      pattern: "*.{flagstat}"
-  - idxstats:
-      type: file
-      description: File containing samtools idxstats output
-      pattern: "*.{idxstats}"
-  - versions:
-      type: file
-      description: File containing software versions
-      pattern: "versions.yml"
+  - dummy_emit:
+      type: boolean
+      description: Dummy emit to make nf-core subworkflows lint happy
 authors:
-  - "@drpatelh"
-  - "@ewels"
+  - "@nvnieuwk"
 maintainers:
-  - "@drpatelh"
-  - "@ewels"
+  - "@nvnieuwk"

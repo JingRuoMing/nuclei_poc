@@ -1,14 +1,30 @@
 id: bytedance-sso-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass via ByteDance SSO
+  name: Content-Security-Policy Bypass - ByteDance SSO
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,bytedance-sso
+  tags: xss,csp-bypass,bytedance-sso,vuln
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "bytedance.com"
+        condition: and
+        internal: true
 
 headless:
   - steps:
@@ -36,4 +52,4 @@ headless:
       - type: dsl
         dsl:
           - "bytedance_sso_csp_xss == true"
-# digest: 4b0a00483046022100cfa0f57f9a9e7ab7563fa4fa1523b14bb6e2ad7b606c87eba680c0a8d94c7b45022100bd4de34aa9aefdbd20bcbf27fae20bb07da329166aa2ca965be7887dd647939e:922c64590222798bb761d5b6d8e72950
+# digest: 490a004630440220345f01ce7eb4da4d5248204dba0251016c774a82391228dc7547a26e5e7017e5022012fcb04021c7c8cabd1a0ad1be9eff228a1b1919e4706f80ca7f9684b4a29fca:922c64590222798bb761d5b6d8e72950

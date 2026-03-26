@@ -1,14 +1,30 @@
 id: vk-api-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass via VK API
+  name: Content-Security-Policy Bypass - VK API
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,vk-api
+  tags: xss,csp-bypass,vk-api,vuln
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "vk.com"
+        condition: and
+        internal: true
 
 headless:
   - steps:
@@ -36,4 +52,4 @@ headless:
       - type: dsl
         dsl:
           - "vk_api_csp_xss == true"
-# digest: 4a0a0047304502206e86ff54d1501d48a5d6f89b28ca8b10962c631dd5b0da54bbb1ff8464230b8a022100e07d8186578536c6214a042b4545efc6a4e5fc236f52fac1bda2a54f236d584f:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a00473045022100a0873defaa5728fa96f43da1c5dc6b007d276cb8fc268ef3b119870064e767be02203303dedae898f544edc2eb6f70a59fb2eb9db036dc8f9d1a22121ba432709489:922c64590222798bb761d5b6d8e72950

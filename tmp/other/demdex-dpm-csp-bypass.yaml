@@ -1,14 +1,30 @@
 id: demdex-dpm-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass via Demdex DPM
+  name: Content-Security-Policy Bypass - Demdex DPM
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,demdex-dpm
+  tags: xss,csp-bypass,demdex-dpm,vuln
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "demdex.net"
+        condition: and
+        internal: true
 
 headless:
   - steps:
@@ -36,4 +52,4 @@ headless:
       - type: dsl
         dsl:
           - "demdex_dpm_csp_xss == true"
-# digest: 490a004630440220366b94efac405aeeff2fbb91b7a6c3aa3e26e780aff1eb58a6963bfc2cd908e202204dac294ab457aa42851246d5745b43ea7002b29fe134f517a8937b8a6cd205ff:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a0048304602210095ffd5fc0397b125cc374ac5f7b3e85827f3230b426c1e104dfaa5242dc570f0022100d460c263bac9b375322ebfac805fcc7402719492c9ccadc31834421b7d38c827:922c64590222798bb761d5b6d8e72950

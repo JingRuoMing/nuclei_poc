@@ -1,14 +1,30 @@
 id: yandex-social-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass via Yandex Social
+  name: Content-Security-Policy Bypass - Yandex Social
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,yandex-social
+  tags: xss,csp-bypass,yandex-social,vuln
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "yandex.ru"
+        condition: and
+        internal: true
 
 headless:
   - steps:
@@ -36,4 +52,4 @@ headless:
       - type: dsl
         dsl:
           - "yandex_social_csp_xss == true"
-# digest: 490a0046304402206852bbf047ed817a92f1c9f34f832e958337883235e76667006978002927ecb2022036b347bd31f9133fd04219e1fff36438231808871eb0c8137fa817b653b2add0:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a00473045022100c5e6f2f6d463742e963cfc33dda41383f6c8ae0fa9bb74f5b34c0eb0ee15e7eb022048733199a68abb94e8ebecea882ecabe07a6769aab628651b57fa505c439866d:922c64590222798bb761d5b6d8e72950

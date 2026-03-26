@@ -1,14 +1,30 @@
 id: yugiohmonstrosdeduelo-blogger-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass via Yugiohmonstrosdeduelo Blogger
+  name: Content-Security-Policy Bypass - Yugiohmonstrosdeduelo Blogger
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,yugiohmonstrosdeduelo-blogger
+  tags: xss,csp-bypass,yugiohmonstrosdeduelo-blogger,vuln
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "blogger.com"
+        condition: and
+        internal: true
 
 headless:
   - steps:
@@ -36,4 +52,4 @@ headless:
       - type: dsl
         dsl:
           - "yugiohmonstrosdeduelo_blogger_csp_xss == true"
-# digest: 490a004630440220074ddf910175c61363fdb7c60db1cb314ca82ee9b5a39960f04ea8f2cdeb37ce02203f4ee00cbc78fdf5a3e93c370441f15c383260c6c638f7d55bb6798003acbcdb:922c64590222798bb761d5b6d8e72950
+# digest: 490a0046304402207267a3bde8919b9eb8b0ba95b38c965d346b3438130b62cbe499da48b1b4618d02204145fbbea7f62e41be54f438f528d8b27c628696d179887eac40c0b8a55fa91e:922c64590222798bb761d5b6d8e72950

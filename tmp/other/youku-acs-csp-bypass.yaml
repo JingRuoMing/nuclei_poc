@@ -1,14 +1,30 @@
 id: youku-acs-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass via Youku ACS
+  name: Content-Security-Policy Bypass - Youku ACS
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,youku-acs
+  tags: xss,csp-bypass,youku-acs,vuln
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "youku.com"
+        condition: and
+        internal: true
 
 headless:
   - steps:
@@ -36,4 +52,4 @@ headless:
       - type: dsl
         dsl:
           - "youku_acs_csp_xss == true"
-# digest: 4a0a0047304502200bd8d16e58f42afebc614bb9b34620eac7b7cb7c1f403236d3a7b1494dbc09f6022100981d8ba01144938fe2e85c2acfa072c0cf4b582fbefd10136a20a297de63df1c:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a0047304502201e20b18134f9127f66f3241fe8a5d2e50215f744031bd7d05e1b07ec34cc68f7022100f1bb15d6af227573eb6fbcdc32bc8375b6d8b3389476b0625d7e14d363712be2:922c64590222798bb761d5b6d8e72950

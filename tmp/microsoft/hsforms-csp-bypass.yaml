@@ -1,14 +1,30 @@
 id: hsforms-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass via HSForms
+  name: Content-Security-Policy Bypass - HSForms
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,hsforms
+  tags: xss,csp-bypass,hsforms,vuln
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "hsforms.com"
+        condition: and
+        internal: true
 
 headless:
   - steps:
@@ -36,4 +52,4 @@ headless:
       - type: dsl
         dsl:
           - "hsforms_csp_xss == true"
-# digest: 490a0046304402200cffae800b8be513a4d7e45cc351fc0cbe0fe33b9bfc3a8a636102ba707c46e802204cfead85d34d4e4b1a22eb21b6b30229c89526d36c95ee6b0f7479d9c05acd1a:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a00483046022100a9c3e2816c6dcfc34d479497e6d9e4e23f84c3fce2f367d800ef60b60ec1f173022100f21d919d6a3aec09402bc77c91bf8025308ca6a4a28034a755320cf4fc79cfd3:922c64590222798bb761d5b6d8e72950

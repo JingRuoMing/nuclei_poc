@@ -1,14 +1,30 @@
 id: adroll-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass via AdRoll
+  name: Content-Security-Policy Bypass - AdRoll
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,adroll
+  tags: xss,csp-bypass,adroll,vuln
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "adroll.com"
+        condition: and
+        internal: true
 
 headless:
   - steps:
@@ -36,4 +52,4 @@ headless:
       - type: dsl
         dsl:
           - "adroll_csp_xss == true"
-# digest: 4a0a004730450221009a73657d594766ae83d1b3f20cb389053ec67bb5c67f28e518a88fe4df1da9ed02204981eecc0ab5e66e5edf29aceb25ccec6020881b51a2685219b531e3891f0470:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a00473045022016493e29406e1a8c4287be587d5286125d287c2957e9e8c7f092a170453fdae302210091c0bfc6435707008003306a43bb1f31dafcdcbc9dab65d2630013a5a331e25e:922c64590222798bb761d5b6d8e72950

@@ -1,14 +1,30 @@
 id: amazon-media-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass via Amazon Media
+  name: Content-Security-Policy Bypass - Amazon Media
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,amazon-media
+  tags: xss,csp-bypass,amazon-media,vuln
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "amazon.com"
+        condition: and
+        internal: true
 
 headless:
   - steps:
@@ -36,4 +52,4 @@ headless:
       - type: dsl
         dsl:
           - "amazon_media_csp_xss == true"
-# digest: 4a0a004730450220736502c42eae5713ba04f2c208700efc7e331b643fb092d23accd25ca1124023022100b61a9b840adac062b72d567ead22c3eb64d7d5809675f9722ebd6b22269d7ab7:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a00483046022100c60e240de30e6a8cb996bd98724b76d6415854078f64d62c201951bd04107f1e022100dba49f8380e7d99f7bd877204e52076a5dd30860d8ff7351efa073c8da229599:922c64590222798bb761d5b6d8e72950

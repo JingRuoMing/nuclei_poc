@@ -1,14 +1,30 @@
 id: google-maps-api-ssl-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass via Google Maps API SSL
+  name: Content-Security-Policy Bypass - Google Maps API SSL
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,google-maps-api-ssl
+  tags: xss,csp-bypass,google-maps-api-ssl,vuln
+
+flow: http(1) && headless(1)
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "Content-Security-Policy"
+          - "google.com"
+        condition: and
+        internal: true
 
 headless:
   - steps:
@@ -36,4 +52,4 @@ headless:
       - type: dsl
         dsl:
           - "google_maps_api_ssl_csp_xss == true"
-# digest: 490a00463044022030059a06e9b79b3a69a7670605047ad8ad340f0146d250df25ad495acb214c3b022032e5e00d092de758c5126d6da1bbca1b337d7b7e4aaa8c39486253b71c6aaf9b:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a00483046022100b27aa67652d0ca269f3ae0878d9a9594027aa8db072f0d1b93bc09bacd71191c0221008d12f5eb453ac95636056fdca3369adede39626ee97b99a0479902d5a5c15a4d:922c64590222798bb761d5b6d8e72950
