@@ -7,8 +7,8 @@ info:
   metadata:
     product: zimaos
     shodan-query:
-    - zimaos
-    vendor: zimaos
+    - html:"zimaos"
+    vendor: zimaspace
     verified: true
 http:
 - method: GET
@@ -18,3 +18,4 @@ http:
   - type: word
     words:
     - zimaos
+    case-insensitive: true
