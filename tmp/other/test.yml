@@ -1,0 +1,39 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore: [extensions/dash/**]
+  push:
+    branches: [main]
+    paths-ignore: [extensions/dash/**]
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-type: [unit, end-to-end]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - run: npm install
+
+      - name: Unit tests
+        if: matrix.test-type == 'unit'
+        run: npx vp test --run
+
+      - name: Install Playwright
+        if: matrix.test-type == 'end-to-end'
+        run: npx playwright install chromium
+
+      - name: E2E tests
+        if: matrix.test-type == 'end-to-end'
+        run: npx playwright test
