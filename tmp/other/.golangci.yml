@@ -1,20 +1,27 @@
+linters-settings:
+  staticcheck:
+    checks: [
+      "all",
+      "-SA1019" # There are valid use cases of strings.Title
+    ]
+  nakedret:
+    max-func-lines: 0 # Disallow any unnamed return statement
+
 linters:
   enable:
-    - cyclop
-    - exportloopref
-    - gocritic
-    - gosec
+    - deadcode
+    - errcheck
+    - gosimple
+    - govet
     - ineffassign
-    - misspell
-    - prealloc
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unused
+    - varcheck
+    - nakedret
+    - gofmt
+    - rowserrcheck
     - unconvert
-    - unparam
     - goimports
-    - whitespace
-
-linters-settings:
-  whitespace:
-    multi-func: true
-  goimports:
-    local-prefixes: gorm.io/gorm
-
+    - unparam

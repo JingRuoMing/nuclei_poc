@@ -1,49 +1,68 @@
-# version format
-version: "{build}"
+# Notes:
+#   - Minimal appveyor.yml file is an empty file. All sections are optional.
+#   - Indent each level of configuration with 2 spaces. Do not use tabs!
+#   - All section names are case-sensitive.
+#   - Section names should be unique on each level.
 
-# Operating system (build VM template)
-os: Windows Server 2012 R2
+version: "1.3.0.{build}-alpha-{branch}"
 
-# Platform.
-platform: x64
+os: Visual Studio 2019
 
-clone_folder: c:\gopath\src\github.com\dgraph-io\badger
+build: off
 
-# Environment variables
+skip_tags: true
+
+clone_folder: c:\gopath\src\github.com\go-ole\go-ole
+
 environment:
-  GOVERSION: 1.12
   GOPATH: c:\gopath
-  GO111MODULE: on
+  GOROOT: c:\go
+  DOWNLOADPLATFORM: "x64"
 
-# scripts that run after cloning repository
+before_test:
+  # - Download COM Server
+  - ps: Start-FileDownload "https://github.com/go-ole/test-com-server/releases/download/v1.0.2/test-com-server-${env:DOWNLOADPLATFORM}.zip"
+  - 7z e test-com-server-%DOWNLOADPLATFORM%.zip -oc:\gopath\src\github.com\go-ole\go-ole > NUL
+  - c:\gopath\src\github.com\go-ole\go-ole\build\register-assembly.bat
+
+test_script:
+  - go test -v -cover ./...
+  # go vet has false positives on unsafe.Pointer with windows/sys. Disabling since it is recommended to use go test instead.
+  # - go vet ./...
+
+branches:
+  only:
+    - master
+    - v1.2
+    - v1.1
+    - v1.0
+
+matrix:
+  allow_failures:
+    - environment:
+      GOROOT: C:\go-x86
+      DOWNLOADPLATFORM: "x86"
+    - environment:
+      GOROOT: C:\go118
+      DOWNLOADPLATFORM: "x64"
+    - environment:
+      GOROOT: C:\go118-x86
+      DOWNLOADPLATFORM: "x86"
+
 install:
-  - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
   - go version
   - go env
-  - python --version
+  - go get -u golang.org/x/tools/cmd/cover
+  - go get -u golang.org/x/tools/cmd/godoc
+  - go get -u golang.org/x/tools/cmd/stringer
 
-# To run your custom scripts instead of automatic MSBuild
 build_script:
-  # We need to disable firewall - https://github.com/appveyor/ci/issues/1579#issuecomment-309830648
-  - ps: Disable-NetFirewallRule -DisplayName 'File and Printer Sharing (SMB-Out)'
-  - cd c:\gopath\src\github.com\dgraph-io\badger
-  - git branch
-  - go get -t ./...
+  - cd c:\gopath\src\github.com\go-ole\go-ole
+  - go get -v -t ./...
+  - go build
 
-# To run your custom scripts instead of automatic tests
-test_script:
-  # Unit tests
-  - ps: Add-AppveyorTest "Unit Tests" -Outcome Running
-  - go test -v github.com/dgraph-io/badger/...
-  - go test -v -vlog_mmap=false github.com/dgraph-io/badger/...
-  - ps: Update-AppveyorTest "Unit Tests" -Outcome Passed
+# disable automatic tests
+test: on
 
-notifications:
-  - provider: Email
-    to:
-      - pawan@dgraph.io
-    on_build_failure: true
-    on_build_status_changed: true
-# to disable deployment
+# disable deployment
 deploy: off
-
