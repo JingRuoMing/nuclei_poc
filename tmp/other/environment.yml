@@ -1,8 +1,7 @@
-name: rseqc_readdistribution
+name: bamtools_split
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - bioconda::rseqc=5.0.3
-  - conda-forge::r-base>=3.5
+  - bioconda::bamtools=2.5.2

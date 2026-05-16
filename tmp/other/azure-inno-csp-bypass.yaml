@@ -1,30 +1,14 @@
 id: azure-inno-csp-bypass
 
 info:
-  name: Content-Security-Policy Bypass - Azure Inno
+  name: Content-Security-Policy Bypass via Azure Inno
   author: renniepak,DhiyaneshDK
   severity: medium
   reference:
     - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,azure-inno,vuln
-
-flow: http(1) && headless(1)
-
-http:
-  - method: GET
-    path:
-      - "{{BaseURL}}"
-
-    matchers:
-      - type: word
-        part: header
-        words:
-          - "Content-Security-Policy"
-          - "azure.com"
-        condition: and
-        internal: true
+  tags: xss,csp-bypass,azure-inno
 
 headless:
   - steps:
@@ -52,4 +36,4 @@ headless:
       - type: dsl
         dsl:
           - "azure_inno_csp_xss == true"
-# digest: 490a0046304402200a5202e270310d8c960ad4e5a42e2bfee37863f2532fe6e4c38cb5b6e796807f02200fbbe94cde8227aaeeebe95b9aa56e64074a7bc6decfeecba864578d10dc9754:922c64590222798bb761d5b6d8e72950
+# digest: 490a0046304402202acd34dea43efb9a7985e86e20e748d344415fa71755382200545d67eb0f0a8502200e2330ed694c31c38cfdb6758ee9ad1996d1a5965a348f28db5b78eeafb6a5a9:922c64590222798bb761d5b6d8e72950
