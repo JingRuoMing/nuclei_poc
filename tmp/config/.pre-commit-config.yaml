@@ -1,83 +1,27 @@
-default_install_hook_types: [pre-commit, commit-msg]
-
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.14
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
     hooks:
-      - id: ruff-check
-        args: [--fix]
-      - id: ruff-format
-
-  - repo: local
-    hooks:
-      - id: ty
-        name: ty check
-        entry: ty check
-        language: python
-        types: [python]
-        additional_dependencies: [ty]
-        args:
-          - --output-format
-          - concise
-          - --ignore
-          - unresolved-import
-          - --ignore
-          - unresolved-attribute
-
-  - repo: builtin
-    hooks:
-      - id: check-case-conflict
-      - id: check-symlinks
-      - id: check-yaml
+      - id: check-docstring-first
       - id: end-of-file-fixer
-      - id: mixed-line-ending
       - id: trailing-whitespace
-
-  - repo: local
+        exclude: ^\.napari-hub/.*
+      - id: check-yaml # checks for correct yaml syntax for github actions ex.
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.2
     hooks:
-      - id: vp-fmt
-        name: Format (oxfmt)
-        entry: npx --package=vite-plus vp fmt --write
-        types_or: [file]
-        language: system
-        pass_filenames: false
-      - id: vp-lint
-        name: Lint (oxlint)
-        entry: npx --package=vite-plus vp lint --fix
-        types_or: [file]
-        language: system
-        pass_filenames: false
-      - id: svelte-check
-        name: Svelte type check
-        entry: bash -c 'npx svelte-kit sync && npx svelte-check-rs --threshold error'
-        language: system
-        types_or: [ts, svelte]
-        pass_filenames: false
-
-  - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.37.2
+      - id: ruff
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
     hooks:
-      - id: check-jsonschema
-        name: Validate element data JSON
-        files: ^src/lib/element/data\.json$
-        args: [--schemafile, src/lib/element/data.schema.json]
-
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.2
+      - id: black
+  - repo: https://github.com/tlambert03/napari-plugin-checks
+    rev: v0.3.0
     hooks:
-      - id: codespell
-        stages: [pre-commit, commit-msg]
-        args:
-          - --ignore-words-list
-          - 'te,ba,nd,ore,claus,manuel,ges,mey,curvelinear,tennant,struc,slac'
-          - --check-filenames
-
-  - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.48.0
-    hooks:
-      - id: markdownlint
-        # MD013: line too long
-        # MD033: no inline HTML
-        # MD041: first line in a file should be a top-level heading
-        args: [--disable, MD013, MD033, MD041, '--']
-        exclude: changelog\.md$
+      - id: napari-plugin-checks
+  # https://mypy.readthedocs.io/en/stable/
+  # you may wish to add this as well!
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.9.0
+  #   hooks:
+  #     - id: mypy

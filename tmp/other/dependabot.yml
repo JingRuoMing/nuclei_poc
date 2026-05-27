@@ -1,12 +1,14 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+# Dependabot configuration
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuring-dependabot-version-updates#enabling-github-dependabot-version-updates
+# https://til.simonwillison.net/github/dependabot-python-setup
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # or another package manager
-    directory: "/"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 5
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: monthly
+  groups:
+    python-packages:
+      patterns:
+        - "*"
