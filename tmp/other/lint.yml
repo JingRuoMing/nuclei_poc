@@ -1,0 +1,41 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  prek:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - run: corepack enable && pnpm install
+
+      # vscode extension is type-aware linted by root oxlint; install its deps
+      # (e.g. @types/vscode) so module resolution succeeds in CI.
+      - run: pnpm -C extensions/vscode install
+
+      - uses: j178/prek-action@v2
+
+  knip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - run: corepack enable && pnpm install
+
+      - name: Check for unused dependencies
+        run: pnpm run knip
