@@ -1,2 +1,2 @@
-subworkflows/bam_stats_samtools:
-  - subworkflows/nf-core/bam_stats_samtools/**
+rseqc/readdistribution:
+  - modules/nf-core/rseqc/readdistribution/**

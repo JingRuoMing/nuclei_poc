@@ -1,43 +1,44 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
-name: bam_stats_samtools
-description: Produces comprehensive statistics from SAM/BAM/CRAM file
+name: rseqc_readdistribution
+description: Calculate how mapped reads are distributed over genomic features
 keywords:
-  - statistics
-  - counts
-  - bam
-  - sam
-  - cram
-components:
-  - samtools/stats
-  - samtools/idxstats
-  - samtools/flagstat
+  - read distribution
+  - genomics
+  - rnaseq
+tools:
+  - rseqc:
+      description: |
+        RSeQC package provides a number of useful modules that can comprehensively evaluate
+        high throughput sequence data especially RNA-seq data.
+      homepage: http://rseqc.sourceforge.net/
+      documentation: http://rseqc.sourceforge.net/
+      doi: 10.1093/bioinformatics/bts356
+      licence: ["GPL-3.0-or-later"]
 input:
-  - ch_bam_bai:
+  - meta:
+      type: map
       description: |
-        The input channel containing the BAM/CRAM and it's index
-        Structure: [ val(meta), path(bam), path(bai) ]
-  - ch_fasta:
-      description: |
-        Reference genome fasta file
-        Structure: [ path(fasta) ]
+        Groovy Map containing sample information
+        e.g. [ id:'test', single_end:false ]
+  - bam:
+      type: file
+      description: the alignment in bam format
+      pattern: "*.{bam}"
+  - bed:
+      type: file
+      description: a bed file for the reference gene model
+      pattern: "*.{bed}"
 output:
-  - stats:
-      description: |
-        File containing samtools stats output
-        Structure: [ val(meta), path(stats) ]
-  - flagstat:
-      description: |
-        File containing samtools flagstat output
-        Structure: [ val(meta), path(flagstat) ]
-  - idxstats:
-      description: |
-        File containing samtools idxstats output
-        Structure: [ val(meta), path(idxstats)]
+  - txt:
+      type: file
+      description: the read distribution report
+      pattern: "*.read_distribution.txt"
   - versions:
-      description: |
-        Files containing software versions
-        Structure: [ path(versions.yml) ]
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
 authors:
   - "@drpatelh"
+  - "@kevinmenden"
 maintainers:
   - "@drpatelh"
+  - "@kevinmenden"
