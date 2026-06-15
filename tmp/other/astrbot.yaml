@@ -5,18 +5,16 @@ info:
   tags: detect,tech,astrbot
   severity: info
   metadata:
-    fofa-query:
-    - body="<title>astrbot"
     product: astrbot
     shodan-query:
-    - html:"<title>astrbot"
-    vendor: soulter
+    - title:"astrbot"
+    vendor: astrbotdevs
     verified: true
 http:
 - method: GET
   path:
   - '{{BaseURL}}/'
   matchers:
-  - type: word
-    words:
-    - <title>astrbot
+  - type: regex
+    regex:
+    - (?mi)<title[^>]*>astrbot.*?</title>
