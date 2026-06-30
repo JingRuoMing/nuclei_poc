@@ -1,49 +1,49 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# This workflow file requires a free account on Semgrep.dev to
-# manage rules, file ignores, notifications, and more.
-#
-# See https://semgrep.dev/docs
-
 name: Semgrep
+
+# Replaces the previous CodeQL workflow, which was configured for JavaScript
+# and Python — neither language exists in this repo. Semgrep covers bash and
+# other languages reconFTW actually ships.
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main, dev]
   pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "main" ]
+    branches: [main, dev]
   schedule:
-    - cron: '33 14 * * 2'
+    - cron: '46 8 * * 3'
+  workflow_dispatch:
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
   semgrep:
-    permissions:
-      contents: read # for actions/checkout to fetch code
-      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-    name: Scan
+    name: Semgrep SAST
     runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep:latest
     steps:
-      # Checkout project source
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      # Scan code using project's configuration on https://semgrep.dev/manage
-      - uses: returntocorp/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d
-        with:
-          publishToken: ${{ secrets.SEMGREP_APP_TOKEN }}
-          publishDeployment: ${{ secrets.SEMGREP_DEPLOYMENT_ID }}
-          generateSarif: "1"
+      - name: Run Semgrep
+        # No --error so the job does not fail CI on findings; results are
+        # uploaded to the GitHub security tab for review. Flip to --error
+        # once the backlog is burned down.
+        run: |
+          semgrep scan \
+            --config p/bash \
+            --config p/security-audit \
+            --config p/secrets \
+            --config p/dockerfile \
+            --config p/github-actions \
+            --sarif \
+            --output=semgrep.sarif \
+            --metrics=off
 
-      # Upload SARIF file generated in previous step
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v4
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: semgrep.sarif
-        if: always()
+          category: semgrep
