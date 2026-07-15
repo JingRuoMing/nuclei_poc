@@ -145,16 +145,10 @@ jobs:
         env:
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
-          # upgrade npm only if the bundled one predates OIDC support (>= 11.5.1):
-          # an unconditional in-place self-update can corrupt npm's own install
-          # (Cannot find module 'sigstore' in libnpmpublish)
-          if [ "$(printf '%s\n' 11.5.1 "$(npm --version)" | sort -V | head -1)" != 11.5.1 ]; then
-            npm install -g npm@latest
-          fi
           if [ "$DRY_RUN" = true ]; then
-            npm publish --ignore-scripts --access public --dry-run
+            npx --yes npm@latest publish --ignore-scripts --access public --dry-run
           else
-            npm publish --ignore-scripts --access public
+            npx --yes npm@latest publish --ignore-scripts --access public
           fi
 
   # === Publish: VS Code extension to Open VSX (Marketplace upload is manual) ===
@@ -227,14 +221,8 @@ jobs:
         env:
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
-          # upgrade npm only if the bundled one predates OIDC support (>= 11.5.1):
-          # an unconditional in-place self-update can corrupt npm's own install
-          # (Cannot find module 'sigstore' in libnpmpublish)
-          if [ "$(printf '%s\n' 11.5.1 "$(npm --version)" | sort -V | head -1)" != 11.5.1 ]; then
-            npm install -g npm@latest
-          fi
           if [ "$DRY_RUN" = true ]; then
-            npm publish --ignore-scripts --access public --dry-run
+            npx --yes npm@latest publish --ignore-scripts --access public --dry-run
           else
-            npm publish --ignore-scripts --access public
+            npx --yes npm@latest publish --ignore-scripts --access public
           fi

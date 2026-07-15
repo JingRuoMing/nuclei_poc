@@ -1,6 +1,7 @@
-id: Django-Debug-Disclosure
+id: Django Debug Disclosure
 info:
-  author: Hacktify Cyber Security (@hacktifycs)
+  author: nithissh
+  cvss: CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N
   description: Attacker can view the config file which contains the username and password
   name: Django Debug Configuration Disclosure
   reference: '- null
@@ -8,7 +9,7 @@ info:
     '
   severity: critical
   tags: django,sde
-requests:
+http:
 - cookie-reuse: true
   matchers:
   - status:
