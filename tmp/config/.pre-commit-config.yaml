@@ -1,78 +1,41 @@
-default_install_hook_types: [pre-commit, commit-msg]
-
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.19
+  - repo: https://gitlab.com/pycqa/flake8.git
+    rev: 3.8.3
     hooks:
-      - id: ruff-check
-        args: [--fix]
-      - id: ruff-format
-
-  - repo: local
+      - id: flake8
+  - repo: https://github.com/asottile/seed-isort-config
+    rev: v2.2.0
     hooks:
-      - id: ty
-        name: ty check
-        entry: ty check
-        language: python
-        types: [python]
-        additional_dependencies: [ty]
-        args:
-          - --output-format
-          - concise
-          - --ignore
-          - unresolved-import
-          - --ignore
-          - unresolved-attribute
-
-  - repo: builtin
+      - id: seed-isort-config
+        args: ["--exclude", ".dev"]
+  - repo: https://github.com/timothycrosley/isort
+    rev: 4.3.21
     hooks:
-      - id: check-case-conflict
-      - id: check-symlinks
+      - id: isort
+  - repo: https://github.com/pre-commit/mirrors-yapf
+    rev: v0.30.0
+    hooks:
+      - id: yapf
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.1.0
+    hooks:
+      - id: trailing-whitespace
       - id: check-yaml
       - id: end-of-file-fixer
+      - id: requirements-txt-fixer
+      - id: double-quote-string-fixer
+      - id: check-merge-conflict
+      - id: fix-encoding-pragma
+        args: ["--remove"]
       - id: mixed-line-ending
-      - id: trailing-whitespace
-
-  - repo: local
-    hooks:
-      - id: vp-fmt
-        name: Format (oxfmt)
-        entry: npx --package=vite-plus vp check --fix
-        types_or: [file]
-        language: system
-        pass_filenames: false
-      - id: svelte-check
-        name: Svelte type check
-        entry: bash -c "npx svelte-kit sync && npx svelte-check --threshold error"
-        language: system
-        types_or: [ts, svelte]
-        pass_filenames: false
-
-  - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.37.3
-    hooks:
-      - id: check-jsonschema
-        name: Validate element data JSON
-        files: ^src/lib/element/data\.json$
-        args: [--schemafile, src/lib/element/data.schema.json]
-
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.2
-    hooks:
-      - id: codespell
-        stages: [pre-commit, commit-msg]
-        args:
-          - --ignore-words-list
-          # statics: static (single-point) calculations
-          - 'te,ba,nd,ore,claus,manuel,ges,mey,curvelinear,tennant,struc,slac,statics'
-          - --check-filenames
-
-  - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.49.0
+        args: ["--fix=lf"]
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 2.1.4
     hooks:
       - id: markdownlint
-        # MD013: line too long
-        # MD033: no inline HTML
-        # MD041: first line in a file should be a top-level heading
-        args: [--disable, MD013, MD033, MD041, '--']
-        exclude: changelog\.md$
+        args: ["-r", "~MD002,~MD013,~MD029,~MD033,~MD034,~MD036"]
+  - repo: https://github.com/myint/docformatter
+    rev: v1.3.1
+    hooks:
+      - id: docformatter
+        args: ["--in-place", "--wrap-descriptions", "79"]
