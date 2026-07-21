@@ -1,60 +1,31 @@
 id: rdp-detect
 
 info:
-  name: Windows RDP Detection
-  author: princechaddha
+  name: RDP Service - Detect
+  author: zan8in
   severity: info
-  tags: windows,rdp,network
-metadata:
-mongoid: 0000
-network:
-  - inputs:
-      - data: "0300002a25e00000000000436f6f6b69653a206d737473686173683d746573740d0a010008000b000000"
-        type: hex
-    read-size: 2048
+  verified: true
+  description: |-
+    RDP 的全称是 Remote Desktop Protocol。
+    它是微软开发的一种专有协议，允许用户远程连接并控制另一台计算机的图形化桌面，就像坐在那台电脑前一样。
+    它传输屏幕图像、键盘和鼠标操作，并支持声音重定向、打印机映射、驱动器共享等高级功能。
+    fofa: protocol="rdp"
+  tags: network,rdp,fingerprint
+  created: 2026/01/09
 
-    host:
-      - "{{Hostname}}"
-      - "{{Host}}:3389"
-
-    matchers:
-      - type: word
-        encoding: hex
-        name: win2000
-        words:
-          - "0300000b06d00000123400"
-      - type: word
-        encoding: hex
-        name: win2003
-        words:
-          - "030000130ed000001234000300080002000000"
-      - type: word
-        encoding: hex
-        name: win2008
-        words:
-          - "030000130ed000001234000200080002000000"
-      - type: word
-        encoding: hex
-        name: win7or2008R2
-        words:
-          - "030000130ed000001234000209080002000000"
-      - type: word
-        encoding: hex
-        name: win2008R2DC
-        words:
-          - "030000130ed000001234000201080002000000"
-      - type: word
-        encoding: hex
-        name: win10
-        words:
-          - "030000130ed00000123400021f080002000000"
-      - type: word
-        encoding: hex
-        name: win2012R2OR8
-        words:
-          - "030000130ed00000123400020f080002000000"
-      - type: word
-        encoding: hex
-        name: win2016
-        words:
-          - "030000130ed00000123400021f080008000000"
+set:
+  host: request.url.host
+rules:
+  r0:
+    request:
+      type: tcp
+      host: "{{host}}"
+      steps:
+        - write:
+            data: "030000130ee000000000000100080003000000"
+            data-type: hex
+        - read:
+            read-size: 4096
+            read-timeout: 3
+    expression: response.raw.bcontains(b"\x03\x00\x00") && response.raw.bcontains(b"\x0e\xd0")
+expression: r0()

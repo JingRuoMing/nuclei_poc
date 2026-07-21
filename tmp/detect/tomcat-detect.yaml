@@ -1,37 +1,27 @@
 id: tomcat-detect
 
 info:
-  name: Tomcat Detection
+  name: Apache Tomcat Detect
   author: philippedelteil,dhiyaneshDk
   severity: info
-  description: If an Tomcat instance is deployed on the target URL, when we send a request for a non existent resource we receive a Tomcat error page with version.
-  metadata:
-    shodan-query: title:"Apache Tomcat"
-  tags: tech,tomcat,apache
-  mongoid: 0000
+  verified: true
+  description: |-
+    An Apache Tomcat Manager panel was discovered.
+    fofa: app="APACHE-Tomcat"
+  tags: tomcat,detect,panel
+  created: 2023/10/14
 
-requests:
-  - method: GET
-    path:
-      - "{{BaseURL}}"
-      - "{{BaseURL}}/{{randstr}}"
-
-    stop-at-first-match: true
-    matchers-condition: or
-    matchers:
-      - type: dsl
-        dsl:
-          - 'contains(tolower(all_headers), "tomcat")'
-
-      - type: dsl
-        dsl:
-          - 'contains(tolower(body), "apache tomcat")'
-          - 'contains(tolower(body), "/manager/html")'
-          - 'contains(tolower(body), "/manager/status")'
-        condition: or
-
+set:
+  randstr: randomLowercase(12)
+rules:
+  r0:
+    request:
+      method: GET
+      path: /{{randstr}}
+    expression: response.raw_header.bcontains(b'tomcat') || response.body.ibcontains(b'apache tomcat') ||  response.body.ibcontains(b'/manager/html') ||  response.body.ibcontains(b'/manager/status')  ||   "Apache Tomcat.*([0-9].[0-9]+.[0-9]+)".bmatches(response.body)
     extractors:
       - type: regex
-        group: 1
-        regex:
-          - '(?i)Apache Tomcat.*([0-9]\.[0-9]+\.[0-9]+)'
+        extractor:
+          ext1: '"(?i)Apache Tomcat.*(?P<version>[1-9][0-9]?\\.[0-9]+\\.([0-9]+|x))".bsubmatch(response.raw)'
+          version: ext1["version"]
+expression: r0()

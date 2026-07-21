@@ -4,38 +4,27 @@ info:
   name: GitLab - User Enumeration
   author: Suman_Kar
   severity: info
+  verified: true
   reference:
     - https://github.com/danielmiessler/SecLists/blob/master/Usernames/Names/malenames-usa-top1000.txt
-  metadata:
-    shodan-query: http.title:"GitLab"
-  tags: gitlab,enum,misconfig,fuzz
-  mongoid: 0000
+  tags: gitlab,enum,user
+  created: 2023/07/20
 
-requests:
-  - raw:
-      - |
-        GET /users/{{user}}/exists HTTP/1.1
-        Host: {{Hostname}}
-        Accept: application/json, text/plain, */*
-        Referer: {{BaseURL}}
-
-    payloads:
-      user: helpers/wordlists/user-list.txt
-
-    stop-at-first-match: true
-    matchers-condition: and
-    matchers:
-
-      - type: regex
-        part: body
-        regex:
-          - "exists.*:true"
-
-      - type: status
-        status:
-          - 200
-
-      - type: word
-        part: header
-        words:
-          - "application/json"
+rules:
+  r0:
+    brute:
+      mode: sniper
+      commit: winner
+      continue: false
+      u:
+        - root
+        - alert-bot
+        - support-bot
+        - devops_user
+        - jenkins
+        - user
+    request:
+      method: GET
+      path: /users/{{u}}/exists
+    expression: response.status == 200 && response.raw_header.bcontains(b'application/json') && "exists.*:true".bmatches(response.body)
+expression: r0()
