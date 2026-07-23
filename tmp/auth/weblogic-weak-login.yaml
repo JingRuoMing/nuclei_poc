@@ -1,31 +1,42 @@
 id: weblogic-weak-login
 
 info:
-  name: WebLogic Weak Login
-  author: shadown1ng
-  description: |-
-    WebLogic default login credentials were discovered.
+  name: WebLogic Default Login
+  author: pdteam
   severity: high
-  verified: true
-  tags: weblogic,weak-login
-  created: 2023/10/14
+  description: WebLogic default login credentials were discovered.
+  reference:
+    - https://github.com/vulhub/vulhub/tree/master/weblogic/weak_password
+    - https://www.s-squaresystems.com/weblogic-default-admin-users-password-change/
+  classification:
+    cvss-metrics: CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:L
+    cvss-score: 8.3
+    cwe-id: CWE-522
+  metadata:
+    max-request: 16
+  tags: default-login,weblogic,vulhub,vuln
 
-rules:
-  r00:
-    request:
-      method: HEAD
-      path: /console/j_security_check
-    expression: |
-      response.status == 302  && response.headers['set-cookie'].contains("ADMINCONSOLESESSION")
-    stop_if_mismatch: true
-  r0:
-    stop_if_match: true
-    brute:
-      mode: clusterbomb
-      commit: winner
-      continue: false
+http:
+  - raw:
+      - |
+        GET /console/ HTTP/1.1
+        Host: {{Hostname}}
+      - |
+        POST /console/j_security_check HTTP/1.1
+        Host: {{Hostname}}
+        Content-Type: application/x-www-form-urlencoded
+
+        j_username={{ username }}&j_password={{ password }}&j_character_encoding=UTF-8
+
+    attack: pitchfork
+    payloads:
       username:
         - weblogic
+        - weblogic
+        - weblogic
+        - weblogic
+        - weblogic
+        - admin
         - admin
         - system
       password:
@@ -37,9 +48,18 @@ rules:
         - 12345678
         - security
         - password
-    request:
-      method: POST
-      path: /console/j_security_check
-      body: j_username={{username}}&j_password={{password}}&j_character_encoding=UTF-8
-    expression: response.status == 302 && !response.headers["location"].icontains("LoginForm.jsp")
-expression: r00() && r0()
+    stop-at-first-match: true
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "/console/index.jsp"
+          - "ADMINCONSOLESESSION"
+        condition: and
+
+      - type: status
+        status:
+          - 302
+# digest: 4a0a004730450220266ca92d38b180d9922223fd5a7be963edc6d9d0e969bf31dda08ee66cdd86f5022100882f2d8db0980a82142c770aa34b6fb34e26edf849a4323ac2eb08b341627f14:922c64590222798bb761d5b6d8e72950
