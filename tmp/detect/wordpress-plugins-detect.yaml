@@ -6,7 +6,7 @@ info:
   severity: info
   metadata:
     max-request: 100563
-  tags: fuzz,wordpress
+  tags: fuzz,wordpress,fuzzing,vuln
 
 http:
   - raw:
@@ -14,7 +14,6 @@ http:
         GET /wp-content/plugins/{{pluginSlug}}/readme.txt HTTP/1.1
         Host: {{Hostname}}
 
-    threads: 50
     payloads:
       pluginSlug: helpers/wordlists/wordpress-plugins.txt
 
@@ -35,4 +34,4 @@ http:
         regex:
           - "===\\s(.*)\\s===" # extract the plugin name
           - "(?m)Stable tag: ([0-9.]+)" # extract the plugin version
-# digest: 490a0046304402206eed7996a0a876cb47e8f096072b9cbd8383bdb6ccff8d1a96a339a6c063758302205068d1a232f4e2eb3ac2609b79ebb96cccc22a095d6b4320f17a4fe8ec19d2d9:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a00473045022100c0e21976f02334a689b33f658f4f1379b266a93cac4b91548d7d413e88c8305302201ab69db4dd9b64f4088373b72b61523b7370bc946d4cc52dd753cba3bac9a558:922c64590222798bb761d5b6d8e72950

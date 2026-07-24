@@ -1,20 +1,23 @@
-id: ssl-duration
+id: dns-duration
 
 info:
-  name: SSL Duration
+  name: DNS Duration
   author: pdteam
   severity: info
 
-flow: ssl("duration_ssl")
+flow: dns("duration_dns")
 
-ssl:
-  - id: duration_ssl
-    address: "{{Host}}:{{Port}}"
+dns:
+  - id: duration_dns
+    name: "{{FQDN}}"
+    type: A
+    class: inet
+    recursion: true
+    retries: 3
     matchers:
       - type: dsl
         condition: and
         dsl:
-          - "probe_status == true"
           - "duration > 0 && duration < 60"
-          - "duration_ssl_duration > 0 && duration_ssl_duration < 60"
-          - "duration == duration_ssl_duration"
+          - "duration_dns_duration > 0 && duration_dns_duration < 60"
+          - "duration == duration_dns_duration"

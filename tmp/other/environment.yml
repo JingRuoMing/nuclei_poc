@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::bamtools=2.5.2
+  - nanocomp=1.25.6

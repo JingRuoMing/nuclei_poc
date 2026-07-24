@@ -1,41 +1,28 @@
 repos:
-  - repo: https://gitlab.com/pycqa/flake8.git
-    rev: 3.8.3
-    hooks:
-      - id: flake8
-  - repo: https://github.com/asottile/seed-isort-config
-    rev: v2.2.0
-    hooks:
-      - id: seed-isort-config
-        args: ["--exclude", ".dev"]
-  - repo: https://github.com/timothycrosley/isort
-    rev: 4.3.21
-    hooks:
-      - id: isort
-  - repo: https://github.com/pre-commit/mirrors-yapf
-    rev: v0.30.0
-    hooks:
-      - id: yapf
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.1.0
+    rev: "v6.0.0"
     hooks:
-      - id: trailing-whitespace
-      - id: check-yaml
-      - id: end-of-file-fixer
-      - id: requirements-txt-fixer
-      - id: double-quote-string-fixer
+      - id: check-added-large-files
+      - id: check-case-conflict
       - id: check-merge-conflict
-      - id: fix-encoding-pragma
-        args: ["--remove"]
+      - id: check-symlinks
+      - id: check-yaml
+      - id: debug-statements
+      - id: end-of-file-fixer
       - id: mixed-line-ending
-        args: ["--fix=lf"]
-  - repo: https://github.com/jumanjihouse/pre-commit-hooks
-    rev: 2.1.4
+      - id: name-tests-test
+        args: ["--pytest-test-first"]
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+      - id: check-docstring-first
+      - id: check-vcs-permalinks
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.13.2"
     hooks:
-      - id: markdownlint
-        args: ["-r", "~MD002,~MD013,~MD029,~MD033,~MD034,~MD036"]
-  - repo: https://github.com/myint/docformatter
-    rev: v1.3.1
+      - id: ruff-format
+      - id: ruff-check
+        args: ["--fix", "--show-fixes", "--unsafe-fixes"]
+  - repo: https://github.com/kynan/nbstripout
+    rev: "0.8.1"
     hooks:
-      - id: docformatter
-        args: ["--in-place", "--wrap-descriptions", "79"]
+      - id: nbstripout

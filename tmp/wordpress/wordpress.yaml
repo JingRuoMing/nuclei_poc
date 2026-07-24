@@ -1,33 +1,32 @@
-id: wordpress
-
-info:
-  name: WordPress User Name Information - Detect
-  author: dwisiswant0
-  severity: info
-  description: WordPress user name information check was conducted.
-  classification:
-    cvss-metrics: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N
-    cvss-score: 0
-    cwe-id: CWE-200
-  metadata:
-    max-request: 1
-  tags: osint,osint-blog,wordpress
-
-self-contained: true
-
 http:
-  - method: GET
-    path:
-      - "https://profiles.wordpress.org/{{user}}/"
-
-    matchers-condition: and
-    matchers:
-      - type: status
-        status:
-          - 200
-
-      - type: word
-        part: body
-        words:
-          - "user-member-since"
-# digest: 4b0a00483046022100e7646bbff60d39ddf44cac8adb0d5042e7103caf689ffd34b9bb800397488993022100d9fced8a0abce6314c62d32d263ef1ca4bc5ad8489027f0c22a5fed7211c0ccf:922c64590222798bb761d5b6d8e72950
+    - matchers:
+        - type: word
+          words:
+            - /wp-content/
+            - content="WordPress
+        - dsl:
+            - ((contains(body, "/wp-includes/js") || (contains(body, "id=\"__next\">") && (!contains(body, "href=\"/_next/")))) || (contains(body, "id=\"__next\"") && contains(body, "/wp-json/")))
+          type: dsl
+      matchers-condition: and
+      method: GET
+      path:
+        - '{{BaseURL}}/'
+    - matchers:
+        - hash:
+            - "1198047028"
+          part: favicon_hash
+          type: favicon
+      method: GET
+      path:
+        - '{{BaseURL}}/favicon.ico'
+id: wordpress-wordpress
+info:
+    author: xray-converter
+    metadata:
+        censys-query: '(services.http.response.body: "/wp-content/" OR services.http.response.body: "content="WordPress") AND (services.http.response.body: "/wp-includes/js" OR services.http.response.body: "id="__next">" AND NOT services.http.response.body: "href="/_next/" OR services.http.response.body: "id="__next"" AND services.http.response.body: "/wp-json/")'
+        cpe: wordpress:wordpress
+        fofa-query: (body="/wp-content/" || body="content=\"WordPress") && (body="/wp-includes/js" || body="id=\"__next\">" && !(body="href=\"/_next/") || body="id=\"__next\"" && body="/wp-json/") || icon_hash="1198047028"
+        hunter-query: (body="/wp-content/" || body="content=\"WordPress") && (body="/wp-includes/js" || body="id=\"__next\">" && !(body="href=\"/_next/") || body="id=\"__next\"" && body="/wp-json/") || icon_hash="1198047028"
+    name: WordPress
+    severity: info
+    tags: neutron,xray,converted

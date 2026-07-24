@@ -1,18 +1,35 @@
-# Dependabot configuration
-# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuring-dependabot-version-updates#enabling-github-dependabot-version-updates
-# https://til.simonwillison.net/github/dependabot-python-setup
-
 version: 2
 updates:
-  - package-ecosystem: pip
+  - package-ecosystem: gomod
     directory: "/"
     schedule:
-      interval: monthly
+      interval: weekly
+      day: monday
+      time: "04:00"
+      timezone: Asia/Shanghai
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - go
+    commit-message:
+      prefix: deps
     groups:
-      python-packages:
+      golang-x:
         patterns:
-          - "*"
-    ignore:
-      - dependency-name: "setuptools"
-      - dependency-name: "ultralytics"
-      - dependency-name: "torch"
+          - "golang.org/x/*"
+      chainreactors:
+        patterns:
+          - "github.com/chainreactors/*"
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "04:30"
+      timezone: Asia/Shanghai
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: deps

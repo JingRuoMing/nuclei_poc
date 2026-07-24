@@ -6,14 +6,15 @@ info:
   severity: high
   metadata:
     max-request: 39
-  tags: lfi,windows,dast
+  tags: lfi,windows,dast,vuln
 
 http:
   - pre-condition:
       - type: dsl
         dsl:
           - 'method == "GET"'
-
+          - 'method == "POST"'
+          - 'method == "PUT"'
     payloads:
       win_fuzz:
         low:
@@ -59,7 +60,9 @@ http:
           - '%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252f%252e%252e%252fwindows%5Cwin.ini'
 
     fuzzing:
-      - part: query
+      - parts:
+          - query
+          - body
         type: replace # replaces existing parameter value with fuzz payload
         mode: multiple # replaces all parameters value with fuzz payload
         fuzz:
@@ -74,4 +77,4 @@ http:
           - "fonts"
           - "extensions"
         condition: and
-# digest: 490a00463044022001665ad128e1e9817134df585972f60d8bebd7740e0472013db313a9d9bb1e99022074ea253f7af516b025cb6d752a251558bc95f751db1ef738df529bc478dda8af:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a0048304602210097c98ed16a07390cbb9ee8d16d7c77a132078dc42da5287f5ddbc33a517ac9e1022100a61552b4945ba285260c57b7f92533334bc51f18527462bc29ae76e8fd2c72ae:922c64590222798bb761d5b6d8e72950
