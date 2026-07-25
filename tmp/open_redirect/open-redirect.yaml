@@ -2,21 +2,27 @@ id: open-redirect
 
 info:
   name: Open Redirect Detection
-  author: princechaddha
+  author: princechaddha,AmirHossein Raeisi
   severity: medium
-  tags: redirect,dast
+  metadata:
+    max-request: 1
+  tags: redirect,dast,vuln
 
 http:
-  - method: GET
-    path:
-      - "{{BaseURL}}"
-
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
+          - 'method == "POST"'
+          - 'method == "PUT"'
     payloads:
       redirect:
-        - "evil.com"
+        - "oast.me"
 
     fuzzing:
-      - part: query
+      - parts:
+          - query
+          - body
         mode: single
         keys:
           - AuthState
@@ -113,10 +119,54 @@ http:
           - validate
           - view
           - window
+          - back
+          - cgi
+          - follow
+          - home
+          - jump
+          - link
+          - location
+          - menu
+          - move
+          - nav
+          - orig_url
+          - out_url
+          - query
+          - auth
+          - callback_url
+          - confirm_url
+          - destination_url
+          - domain_url
+          - entry
+          - exit
+          - forward_url
+          - go_to
+          - goto_url
+          - home_url
+          - image_link
+          - load
+          - logout_url
+          - nav_to
+          - origin
+          - page_link
+          - redirect_link
+          - ref
+          - referrer_url
+          - return_link
+          - return_to_url
+          - source_url
+          - target_url
+          - to_url
+          - validate_url
+          - DirectTo
+          - relay
+
         fuzz:
           - "https://{{redirect}}"
 
-      - part: query
+      - parts:
+          - query
+          - body
         mode: single
         values:
           - "https?://" # Replace HTTP URLs with alternatives
@@ -129,10 +179,11 @@ http:
       - type: regex
         part: header
         regex:
-          - '(?m)^(?:Location\s*?:\s*?)(?:https?:\/\/|\/\/|\/\\\\|\/\\)?(?:[a-zA-Z0-9\-_\.@]*)evil\.com\/?(\/|[^.].*)?$' # https://regex101.com/r/ZDYhFh/1
+          - '(?m)^(?:Location\s*?:\s*?)(?:https?:\/\/|\/\/|\/\\\\|\/\\)(?:[a-zA-Z0-9\-_\.@]*)oast\.me\/?(\/|[^.].*)?$' # https://regex101.com/r/idfD2e/1
 
       - type: status
         status:
           - 301
           - 302
           - 307
+# digest: 490a004630440220099586c444f668b4e6020d6a808c246ee5ac3e294705488d1ba5acdd6508bb10022004dc9a31bd11257b46b2a49fc035d89f22af5f2de3916a2f8e2cff33ed7c16d6:922c64590222798bb761d5b6d8e72950
