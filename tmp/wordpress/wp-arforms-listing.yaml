@@ -1,21 +1,25 @@
 id: wp-arforms-listing
-
 info:
   name: WordPress Plugin Arforms Listing
   author: pussycat0x
   severity: info
-  description: Searches for sensitive directories present in the arforms plugin.
-  reference:
-    - https://www.exploit-db.com/ghdb/6424
-  metadata:
-    max-request: 1
-  tags: listing,plugin,edb,wordpress,vuln
+  description: Searches for sensitive directories present in the wordpress-plugins plugin.
+  reference: https://www.exploit-db.com/ghdb/6424
+  tags: wordpress,listing
 
-http:
-  - method: GET
-    path:
-      - "{{BaseURL}}/wp-content/plugins/arforms/"
+requests:
+  - payloads:
+      Subdomains: /home/mahmoud/Wordlist/AllSubdomains.txt
+    attack: sniper
+    threads: 100
 
+    raw:
+      - |
+        GET /wp-content/plugins/arforms/ HTTP/1.1
+        Host: {{Subdomains}}
+        User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0
+        Accept-Encoding: gzip, deflate
+        Accept: */*
     matchers-condition: and
     matchers:
       - type: word
@@ -25,6 +29,6 @@ http:
         condition: and
 
       - type: status
+
         status:
           - 200
-# digest: 4b0a00483046022100ece45389b1fb210751430599ee1366b33890557355caa327084fa39fe5687b5c022100b2180d6a8c23313b93bd44f08a214216339981bcf1dad25ef25b935e740a75de:922c64590222798bb761d5b6d8e72950
