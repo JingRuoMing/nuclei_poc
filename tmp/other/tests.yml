@@ -1,102 +1,83 @@
-name: tests
-
-permissions:
-  contents: read
+name: 🛠 Tests
 
 on:
-  push:
   pull_request:
+    paths:
+      - '**.yaml'
   workflow_dispatch:
-    inputs:
-      run_full_integration:
-        description: Run full integration suite
-        required: false
-        default: "false"
-        type: choice
-        options:
-          - "false"
-          - "true"
-  schedule:
-    - cron: "0 3 * * 0"
 
 jobs:
-  shellcheck:
-    name: shellcheck
+  lint:
     runs-on: ubuntu-latest
+    if: github.repository == 'projectdiscovery/nuclei-templates'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: karancode/yamllint-github-action@v2.1.1
+        with:
+          yamllint_config_filepath: .yamllint
+          yamllint_strict: false
+          yamllint_comment: true
 
-      - name: Install shellcheck
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
-
-      - name: Run shellcheck
-        run: shellcheck -S error reconftw.sh modules/*.sh lib/*.sh install.sh
-
-  unit-fast:
-    name: unit-fast
+  validate:
+    needs: lint
     runs-on: ubuntu-latest
+    if: github.repository == 'projectdiscovery/nuclei-templates'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: projectdiscovery/actions/setup/nuclei@v1
+        with:
+          token: '${{ secrets.GITHUB_TOKEN }}'
+      - name: Validate templates
+        run: nuclei -duc -validate -lfa -ud $GITHUB_WORKSPACE -w workflows/ -et .github/
 
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y bats jq
-
-      - name: Run unit tests
-        run: ./tests/run_tests.sh --unit
-
-  integration-smoke:
-    name: integration-smoke
+  weak-matcher-checks:
+    needs: lint
     runs-on: ubuntu-latest
-    needs:
-      - unit-fast
+    if: github.repository == 'projectdiscovery/nuclei-templates'
+    permissions:
+      issues: write
+      pull-requests: write
+    env:
+      HONEYPOT_URL: 'http://honey.scanme.sh'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          list-files: shell
+          filters: |
+            templates: &templates
+              - '**.yml'
+              - '**.yaml'
+              - '!.github/**'
+            changed:
+              - added|modified: *templates
+      - uses: projectdiscovery/actions/setup/nuclei@v1
+        with:
+          token: '${{ secrets.GITHUB_TOKEN }}'
+      - run: bash weak-matcher-checks.sh
+        id: check
+        if: steps.filter.outputs.changed == 'true'
+        env:
+          CHANGED_FILES: '${{ steps.filter.outputs.changed_files }}'
+        working-directory: '.github/scripts/'
+      - uses: actions/github-script@v7
+        if: steps.check.outputs.weak == 'true'
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: process.env.COMMENT
+            })
 
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y bats jq
-
-      - name: Run integration smoke tests
-        run: ./tests/run_tests.sh --smoke
-
-  macos-smoke:
-    name: macos-smoke
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          brew update
-          brew install bash bats-core jq coreutils gnu-getopt gnu-sed
-
-      - name: Configure GNU toolchain PATH
-        run: |
-          BREW_PREFIX="$(brew --prefix)"
-          echo "$BREW_PREFIX/bin" >> "$GITHUB_PATH"
-          echo "$BREW_PREFIX/opt/coreutils/libexec/gnubin" >> "$GITHUB_PATH"
-          echo "$BREW_PREFIX/opt/gnu-getopt/bin" >> "$GITHUB_PATH"
-          echo "$BREW_PREFIX/opt/gnu-sed/libexec/gnubin" >> "$GITHUB_PATH"
-
-      - name: Run unit tests
-        run: ./tests/run_tests.sh --unit
-
-      - name: Run integration smoke tests
-        run: ./tests/run_tests.sh --smoke
-
-  integration-full:
-    name: integration-full
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_full_integration == 'true')
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y bats jq
-
-      - name: Run full integration tests
-        run: ./tests/run_tests.sh --integration
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['false-positive']
+            })
+        env:
+          COMMENT: '${{ steps.check.outputs.comment }}'
+          GITHUB_TOKEN: '${{ secrets.PDTEAMX_CLASSIC_PAT }}'

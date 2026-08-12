@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - nanocomp=1.25.6
+  - bioconda::seqkit=2.13.0

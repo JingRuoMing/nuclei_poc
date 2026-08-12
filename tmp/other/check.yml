@@ -1,8 +1,11 @@
 name: Check Nuclei POCs
 
 on:
+  push:
+    branches:
+      - main
   schedule:
-    - cron: '0 1,13 * * *'
+    - cron: '10 12 * * *'
 
 jobs:
   build:
@@ -39,9 +42,9 @@ jobs:
       
     - name: Commit and Push changes
       run: |
-        echo $(date +'%Y%m%d%H') > date.txt
-        git config --local user.email "admin@adysec.com"
-        git config --local user.name "adysec"
+        echo $(date +'%Y%m%d') > date.txt
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
         git add .
         git commit -am "$(date +'%Y%m%d')"
         git push -v --progress

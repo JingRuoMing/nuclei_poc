@@ -58,13 +58,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        build: [ linux, windows-gnu, macos, macos_m1,win-msvc, win7-msvc, linux-arm-v7, linux-aarch64 ]
+        build: [ linux, linux-gnu, macos, macos_m1,win-msvc, win7-msvc, linux-arm-v7, linux-aarch64 ]
         include:
           - build: linux
             os: ubuntu-latest
             rust: stable
             target: x86_64-unknown-linux-musl
-          - build: windows-gnu
+          - build: linux-gnu
             os: ubuntu-latest
             rust: stable
             target: x86_64-pc-windows-gnu
@@ -83,7 +83,7 @@ jobs:
           - build: win7-msvc
             os: windows-latest
             rust: nightly
-            target: x86_64-win7-windows-msvc
+            target: x86_64-pc-windows-msvc
           - build: linux-arm-v7
             os: ubuntu-latest
             rust: stable
@@ -104,7 +104,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-multilib xz-utils liblz4-tool libc6-dev libssl-dev musl-tools pkg-config patchelf gcc-mingw-w64-x86-64 mingw-w64 protobuf-compiler
+          sudo apt-get install -y gcc-multilib xz-utils liblz4-tool libc6-dev libssl-dev musl-tools pkg-config patchelf
           sudo apt-get install -y gcc-aarch64-linux-gnu gcc-arm-linux-gnueabihf
           sed -i -e "s/^version = .*/version = \"`date +'%-Y.%-m.%-d'`\"/" observer_ward/Cargo.toml
           sed -i -e "s/\"observer_ward version\"/\"observer_ward v`date +'%-Y.%-m.%-d'`\"/" observer_ward/src/cli.rs
@@ -118,21 +118,17 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: bash
         run: |
-          choco install llvm openssl
           choco config set cacheLocation "${{ github.workspace }}\choco-cache"
-          choco install -y --no-progress protoc
           export CARGO_PKG_VERSION=`date +'%-Y.%-m.%-d'`
           sed -i -e "s/^version = .*/version = \"`date +'%-Y.%-m.%-d'`\"/" observer_ward/Cargo.toml
           sed -i -e "s/\"observer_ward version\"/\"observer_ward v`date +'%-Y.%-m.%-d'`\"/" observer_ward/src/cli.rs
           echo "CARGO_PKG_VERSION=`date +'%Y.%m.%d'`" >>$GITHUB_ENV
-          echo "OPENSSL_DIR=C:\Program Files\OpenSSL-Win64" >>$GITHUB_ENV
           echo "RUSTFLAGS=-C target-feature=+crt-static" >>$GITHUB_ENV
       - name: Install packages (Macos)
         if: matrix.os == 'macos-latest'
         run: |
           sed -i -e "s/^version = .*/version = \"`date +'%-Y.%-m.%-d'`\"/" observer_ward/Cargo.toml
           sed -i -e "s/\"observer_ward version\"/\"observer_ward v`date +'%-Y.%-m.%-d'`\"/" observer_ward/src/cli.rs
-          brew install protobuf
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -145,14 +141,10 @@ jobs:
         run: |
           cargo build --target ${{ matrix.target }} --verbose --release --bin observer_ward
       - name: Build nightly release binary
-        if: matrix.target == 'x86_64-win7-windows-msvc'
+        if: matrix.rust == 'nightly'
         run: |
-          rustup toolchain install nightly
-          rustup component add rust-src --toolchain nightly
-          rustup component add rust-src --toolchain nightly-${{ matrix.target }}
-          rustup target add ${{ matrix.target }}
-          cargo clean
-          cargo +nightly build --target ${{ matrix.target }} -Z build-std --verbose --release --bin observer_ward
+          rustup component add rust-src --toolchain nightly-x86_64-pc-windows-msvc
+          cargo +nightly build --target ${{ matrix.target }} -Zbuild-std --verbose --release --bin observer_ward
       - name: Build archive
         shell: bash
         run: |
@@ -161,16 +153,14 @@ jobs:
           cp {README.md,LICENSE} "$staging/"
           if [ "${{ matrix.os }}" = "windows-latest" ] || [[ "${{ matrix.target }}" == *"windows"* ]]; then
             bin_file="target/${{ matrix.target }}/release/${{ env.BIN_NAME }}.exe"
-            cp "$bin_file" "$staging/${{ matrix.target }}.exe"
-            bin_file="$staging/${{ matrix.target }}.exe"
+            cp "$bin_file" "$staging/"
             cd "$staging"
             7z a "../$staging.zip" .
             echo "ASSET=$staging.zip" >> $GITHUB_ENV
             echo "BIN_FILE=$bin_file" >> $GITHUB_ENV
           else
             bin_file="target/${{ matrix.target }}/release/${{ env.BIN_NAME }}"
-            cp "$bin_file" "$staging/${{ matrix.target }}"
-            bin_file="$staging/${{ matrix.target }}"
+            cp "$bin_file" "$staging/"
             echo "ASSET=$staging.tar.gz" >> $GITHUB_ENV
             echo "BIN_FILE=$bin_file" >> $GITHUB_ENV
             tar czf "$staging.tar.gz" -C "$staging" ${{ matrix.target }} README.md LICENSE
@@ -188,7 +178,7 @@ jobs:
             ${{ env.BIN_FILE }}
           tag_name: defaultv4
       - name: Install Cargo deb (Ubuntu)
-        if: matrix.os == 'ubuntu-latest' && matrix.target != 'x86_64-pc-windows-gnu'
+        if: matrix.os == 'ubuntu-latest'
         run: |
           cargo install cargo-deb
           cargo deb --target ${{ matrix.target }} --output target/${{ matrix.target }}/debian/observer-ward_${{ needs.create-release.outputs.release_version }}_${{ matrix.target }}.deb

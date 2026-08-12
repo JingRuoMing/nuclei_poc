@@ -8,7 +8,7 @@ info:
     Shell startup and environment files (e.g., .bashrc, .bash_profile, .bash_logout) were not owned by the user or root and had insecure write permissions.Malicious users could manipulate environment variables or inject commands.
   reference:
     - https://isms.kisa.or.kr
-  tags: linux,local,audit,compliance,kisa
+  tags: linux,audit,compliance,kisa
 
 self-contained: true
 
@@ -21,10 +21,7 @@ code:
         HOME_DIR=$(eval echo ~$user)
         find "$HOME_DIR" -maxdepth 1 -type f \
           \( -name ".bashrc" -o -name ".bash_profile" -o -name ".bash_logout" \) \
-          -exec ls -l {} \; | awk -v usr="$user" '{
-            if ($3 != "root" && $3 != usr) print "INVALID_OWNER", $0
-            else print $0
-          }'
+          -exec ls -l {} \; | awk -v usr="$user" '{print $0, "EXPECTED_USER="usr}'
       done
 
     matchers:
@@ -39,5 +36,5 @@ code:
         name: invalid-owner
         part: response
         regex:
-          - "^INVALID_OWNER"
-# digest: 4b0a004830460221008f1026cc0254988a320127f54f6632957306601d6961aea2ac9a446cd5f6b9ab02210086b126c50bbc20138ad7477bb88eeaf1b605461def18dd415775fd23651b9758:922c64590222798bb761d5b6d8e72950
+          - "^\\S+\\s+\\S+\\s+(?!root|.*EXPECTED_USER=)"
+# digest: 4a0a0047304502203f1017f55f1e53443f87aed8f6044cb4f1e74f00ffa71bc788fd4aa36f3a36250221008dd6751a0a6d2df9a8a5fe6b608ca587808dab56c2b8afe7a3a6fa790142261f:922c64590222798bb761d5b6d8e72950
