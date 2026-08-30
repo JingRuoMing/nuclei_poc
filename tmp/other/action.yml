@@ -1,0 +1,40 @@
+name: Setup
+description: Node 24 + pnpm, root install, and optional extension installs
+
+inputs:
+  extensions:
+    description: Space-separated extension dirs under extensions/ to also install
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v6
+      with:
+        node-version: 24
+    - shell: bash
+      env:
+        EXTENSIONS: ${{ inputs.extensions }}
+        # Root `prepare` (src/scripts/prepare.mjs) builds dist/ when it is missing so git
+        # dependencies (github:janosh/matterviz#main) install usable; jobs here build it
+        # explicitly where they need it, so skip the ~20 s svelte-package run on install.
+        MATTERVIZ_SKIP_PREPARE: 1
+      run: |
+        corepack enable
+        # Registry packages ship their generated artifacts, so their prepare scripts do not
+        # need to run. Without a pnpm-workspace.yaml allowlist, keep skipped builds non-fatal.
+        pnpm install --config.strict-dep-builds=false
+        # anywidget depends on `matterviz: file:../..`, which pnpm copies (hard-links) at install
+        # time, so the svelte-package output must exist before that install or the copy has no
+        # dist/ (dependencies never run `prepare`, only the root project does).
+        case " $EXTENSIONS " in *" anywidget "*) pnpm package:dist ;; esac
+        # --ignore-workspace: a freshly released dep trips pnpm's cooldown
+        # (minimumReleaseAge), auto-creating a pnpm-workspace.yaml that makes these
+        # standalone extension installs no-ops (skipping anywidget/@types/node/matterviz).
+        # strict-dep-builds: anywidget's published svelte-widgets and JupyterLab's
+        # fontawesome ship built artifacts, so their skipped lifecycle scripts are safe.
+        for ext in $EXTENSIONS; do
+          if [ "$ext" = vscode ]; then strict_builds=true; else strict_builds=false; fi
+          pnpm -C "extensions/$ext" install --ignore-workspace \
+            --config.strict-dep-builds="$strict_builds"
+        done

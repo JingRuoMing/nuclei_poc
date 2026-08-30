@@ -5,10 +5,12 @@ info:
   tags: detect,tech,gotenberg
   severity: info
   metadata:
+    fofa-query:
+    - gotenberg
     product: gotenberg
     shodan-query:
-    - http.html:"gotenberg"
-    vendor: thecodingmachine
+    - gotenberg
+    vendor: gotenberg
     verified: true
 http:
 - method: GET
