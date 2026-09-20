@@ -20,4 +20,3 @@ http:
   - type: word
     words:
     - shaper_helix3
-    case-insensitive: true

@@ -21,4 +21,3 @@ http:
     words:
     - concrete5
     - concretecms
-    case-insensitive: true

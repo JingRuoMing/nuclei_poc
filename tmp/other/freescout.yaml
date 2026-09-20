@@ -20,4 +20,3 @@ http:
   - type: word
     words:
     - freescout
-    case-insensitive: true

@@ -20,4 +20,3 @@ http:
   - type: word
     words:
     - mailinspector
-    case-insensitive: true

@@ -20,4 +20,3 @@ http:
   - type: word
     words:
     - geo-mashup
-    case-insensitive: true

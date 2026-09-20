@@ -20,4 +20,3 @@ http:
   - type: word
     words:
     - flagr
-    case-insensitive: true

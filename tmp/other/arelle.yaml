@@ -18,4 +18,3 @@ http:
   - type: word
     words:
     - arelle web services
-    case-insensitive: true
