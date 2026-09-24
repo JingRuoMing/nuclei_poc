@@ -1,20 +1,32 @@
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - master
-    paths:
-      - '.github/workflows/sync.yml'
+# Your GitHub Actions workflow
+name: Sync Repositories
 
-name: Update universe
-
-# Do not launch new job before the old one is done
-concurrency: ${{ github.workflow }}
+on: [push] # This line is defining a push event trigger
 
 jobs:
-  update:
-    name: Update submodules
-    uses: r-universe-org/workflows/.github/workflows/sync.yml@v3
-    secrets:
-      GH_APP_KEY: ${{ secrets.GH_APP_KEY }}
-      BOT_TOKEN: ${{ secrets.GHPAT }}
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Repo
+        uses: actions/checkout@v2
+        with:
+          repository: 'src_user/src_repo'
+          token: ${{ secrets.YOUR_GITHUB_TOKEN }}
+          path: src_repo
+
+      - name: Checkout Destination Repo
+        uses: actions/checkout@v2
+        with:
+          repository: 'dest_user/dest_repo'
+          token: ${{ secrets.YOUR_GITHUB_TOKEN }}
+          path: dest_repo
+
+      - name: Sync Repositories
+        run: |
+          rsync -a --delete src_repo/ dest_repo/
+          cd dest_repo
+          git config user.name 'Your Name'
+          git config user.email 'your-email@example.com'
+          git add .
+          git commit -m "Sync with source repo"
+          git push

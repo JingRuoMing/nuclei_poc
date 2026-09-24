@@ -1,78 +1,75 @@
-name: rseqc_readdistribution
-description: Calculate how mapped reads are distributed over genomic features
+name: csvtk_concat
+description: Concatenate two or more CSV (or TSV) tables into a single table
 keywords:
-  - read distribution
-  - genomics
-  - rnaseq
+  - concatenate
+  - tsv
+  - csv
 tools:
-  - rseqc:
-      description: |
-        RSeQC package provides a number of useful modules that can comprehensively evaluate
-        high throughput sequence data especially RNA-seq data.
-      homepage: http://rseqc.sourceforge.net/
-      documentation: http://rseqc.sourceforge.net/
-      doi: 10.1093/bioinformatics/bts356
-      licence: ["GPL-3.0-or-later"]
-      identifier: biotools:rseqc
+  - csvtk:
+      description: A cross-platform, efficient, practical CSV/TSV toolkit
+      homepage: http://bioinf.shenwei.me/csvtk
+      documentation: http://bioinf.shenwei.me/csvtk
+      tool_dev_url: https://github.com/shenwei356/csvtk
+      licence:
+        - "MIT"
+      identifier: ""
 input:
   - - meta:
         type: map
         description: |
           Groovy Map containing sample information
           e.g. [ id:'test', single_end:false ]
-    - bam:
+    - csv:
         type: file
-        description: the alignment in bam format
-        pattern: "*.{bam}"
-        ontologies: []
-    - bai:
-        type: file
-        description: BAM index file
-        pattern: "*.{bai}"
-        ontologies: []
-  - bed:
-      type: file
-      description: a bed file for the reference gene model
-      pattern: "*.{bed}"
-      ontologies: []
+        description: CSV/TSV formatted files
+        pattern: "*.{csv,tsv}"
+        ontologies:
+          - edam: http://edamontology.org/format_3752 # CSV
+          - edam: http://edamontology.org/format_3475 # TSV
+  - in_format:
+      type: string
+      description: Input format (csv, tab, or a delimiting character)
+      pattern: "*"
+  - out_format:
+      type: string
+      description: Output format (csv, tab, or a delimiting character)
+      pattern: "*"
 output:
-  txt:
+  csv:
     - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - ${prefix}.${out_extension}:
           type: file
-          description: the read distribution report
-          pattern: "*.read_distribution.txt"
-          ontologies: []
-      - "*.read_distribution.txt":
-          type: file
-          description: the read distribution report
-          pattern: "*.read_distribution.txt"
-          ontologies: []
-  versions_rseqc:
+          description: Concatenated CSV/TSV file
+          pattern: "*.{csv,tsv}"
+          ontologies:
+            - edam: http://edamontology.org/format_3752 # CSV
+            - edam: http://edamontology.org/format_3475 # TSV
+  versions_csvtk:
     - - ${task.process}:
           type: string
-          description: The process the versions were collected from
-      - rseqc:
+          description: The name of the process
+      - csvtk:
           type: string
-          description: The tool name
-      - read_distribution.py --version | sed "s/read_distribution.py //":
+          description: The name of the tool
+      - csvtk version | sed -e 's/csvtk v//g':
           type: eval
           description: The expression to obtain the version of the tool
 topics:
   versions:
     - - ${task.process}:
           type: string
-          description: The process the versions were collected from
-      - rseqc:
+          description: The name of the process
+      - csvtk:
           type: string
-          description: The tool name
-      - read_distribution.py --version | sed "s/read_distribution.py //":
+          description: The name of the tool
+      - csvtk version | sed -e 's/csvtk v//g':
           type: eval
           description: The expression to obtain the version of the tool
 authors:
-  - "@drpatelh"
-  - "@kevinmenden"
-  - "@rhassaine"
+  - "@rpetit3"
 maintainers:
-  - "@drpatelh"
-  - "@kevinmenden"
-  - "@rhassaine"
+  - "@rpetit3"

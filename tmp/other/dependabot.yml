@@ -1,25 +1,35 @@
-# Every ecosystem below carries a 7-day cooldown: a brand-new release can be
-# malicious or simply broken, and nothing here is urgent enough to take on the
-# day it ships. Dependabot security updates bypass the cooldown.
 version: 2
 updates:
-  - package-ecosystem: "pip"
+  - package-ecosystem: gomod
     directory: "/"
     schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
+      interval: weekly
+      day: monday
+      time: "04:00"
+      timezone: Asia/Shanghai
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - go
+    commit-message:
+      prefix: deps
+    groups:
+      golang-x:
+        patterns:
+          - "golang.org/x/*"
+      chainreactors:
+        patterns:
+          - "github.com/chainreactors/*"
 
-  - package-ecosystem: "docker"
+  - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
-
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
+      interval: weekly
+      day: monday
+      time: "04:30"
+      timezone: Asia/Shanghai
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: deps
