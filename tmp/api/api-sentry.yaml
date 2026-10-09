@@ -1,23 +1,21 @@
-http:
-- headers:
-    Authorization: Bearer {{token}}
-  matchers:
-  - status:
-    - 200
-    type: status
-  method: GET
-  path:
-  - https://sentry.io/api/0/projects/
 id: api-sentry
 info:
-  author: 0ri2N
-  metadata:
-    max-request: 1
   name: Sentry API Test
-  reference:
-  - https://sentry.io
-  - https://docs.sentry.io
-  - https://docs.sentry.io/api/auth
+  author: 0ri2N
   severity: info
+  reference:
+    - https://sentry.io
+    - https://docs.sentry.io
+    - https://docs.sentry.io/api/auth
   tags: sentry,tracing,tracking,monitoring,token-spray
 self-contained: true
+requests:
+  - method: GET
+    path:
+      - "https://sentry.io/api/0/projects/"
+    headers:
+      Authorization: Bearer {{token}}
+    matchers:
+      - type: status
+        status:
+          - 200
