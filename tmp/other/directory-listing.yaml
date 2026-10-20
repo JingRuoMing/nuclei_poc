@@ -14,7 +14,7 @@ info:
     - https://portswigger.net/kb/issues/00600100_directory-listing
   metadata:
     max-request: 2
-  tags: misc,generic,misconfig,fuzz,miscellaneous,vuln
+  tags: misc,generic,misconfig,fuzz,miscellaneous
 flow: |
   function target_is_in_scope(url) {
     if (url.startsWith(template.http_1_host) || url.startsWith("/")) {
@@ -99,4 +99,4 @@ http:
       - type: status
         status:
           - 200
-
+# digest: 4b0a00483046022100bf3abb30efea65d3777450c5714ebe448312e22da383052988a9fa179ea9c5b2022100885960a00ac1e8e5bb00b36bf9ba45cce77466505aac2e70eafbff1efad5f121:922c64590222798bb761d5b6d8e72950

@@ -4,4 +4,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - conda-forge::csvtk=0.37.0
+  - bioconda::ucsc-gtftogenepred=482

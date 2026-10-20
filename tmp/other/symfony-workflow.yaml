@@ -1,5 +1,4 @@
 id: symfony-workflow
-
 info:
   name: Symfony Security Checks
   author: daffainfo
@@ -10,4 +9,4 @@ workflows:
     matchers:
       - name: symfony
         subtemplates:
-          - tags: symfony
+          -

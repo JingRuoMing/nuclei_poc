@@ -1,27 +1,27 @@
-# See https://pre-commit.com for more information
-# Install: pip install pre-commit && pre-commit install
 repos:
-  - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.9.0
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
     hooks:
-      - id: shellcheck
-        args: ["--severity=error"]
-        files: \.(sh|bash)$
-        exclude: ^tests/mocks/
-
-  - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.7.0-1
+      - id: check-docstring-first
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        exclude: ^\.napari-hub/.*
+      - id: check-yaml # checks for correct yaml syntax for github actions ex.
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.2
     hooks:
-      - id: shfmt
-        args: ["-i", "4", "-ci", "-bn"]
-        files: \.(sh|bash)$
-        exclude: ^tests/mocks/
-
-  - repo: local
+      - id: ruff
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
     hooks:
-      - id: bats-tests
-        name: Run bats tests
-        entry: bash -c 'bats tests/unit/'
-        language: system
-        pass_filenames: false
-        files: \.(sh|bash|bats)$
+      - id: black
+  - repo: https://github.com/tlambert03/napari-plugin-checks
+    rev: v0.3.0
+    hooks:
+      - id: napari-plugin-checks
+  # https://mypy.readthedocs.io/en/stable/
+  # you may wish to add this as well!
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.9.0
+  #   hooks:
+  #     - id: mypy

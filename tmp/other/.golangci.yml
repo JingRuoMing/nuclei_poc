@@ -1,26 +1,20 @@
-run:
-  deadline: 10m
-
 linters:
   enable:
-  - dupl
-  - goconst
-  - gocyclo
-  - godox
-  - gosec
-  - interfacer
-  - lll
-  - maligned
-  - misspell
-  - prealloc
-  - stylecheck
-  - unconvert
-  - unparam
-  - errcheck
-  - golint
-  - gofmt
-  disable: []
-  fast: false
+    - cyclop
+    - exportloopref
+    - gocritic
+    - gosec
+    - ineffassign
+    - misspell
+    - prealloc
+    - unconvert
+    - unparam
+    - goimports
+    - whitespace
 
-issues:
-  exclude-use-default: false
+linters-settings:
+  whitespace:
+    multi-func: true
+  goimports:
+    local-prefixes: gorm.io/gorm
+
