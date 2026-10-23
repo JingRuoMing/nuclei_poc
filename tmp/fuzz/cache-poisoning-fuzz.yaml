@@ -9,7 +9,7 @@ info:
     - https://portswigger.net/web-security/web-cache-poisoning
   metadata:
     max-request: 5834
-  tags: fuzz,cache,fuzzing,vuln
+  tags: fuzz,cache
 
 http:
   - raw:
@@ -34,4 +34,5 @@ http:
           - 'contains(body_1, "{{randstr}}")'
           - 'contains(body_2, "{{randstr}}")'
         condition: and
-# digest: 490a00463044022029c36c60f8deb9db76f34c44084922582d3bd294a9589c0837884a92647d2b1e02200ff390569d3f6b6d673275f97ceaef72c2798c0846fd4c5faa3849f67de9445d:922c64590222798bb761d5b6d8e72950
+
+# digest: 4a0a00473045022059fbf3d4d11dfb4d85e0fcb0aff33d0086e430c5a3b66cbacdd12d4f2a9ad26e022100a74a6995274757244f57bb4473b5d923e7a6a5bbb2e111fdbe6d66172c803cfb:922c64590222798bb761d5b6d8e72950
