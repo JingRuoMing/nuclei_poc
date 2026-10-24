@@ -1,5 +1,26 @@
 run:
-  tests: false
+  deadline: 10m
 
-output:
-  sort-results: true
+linters:
+  enable:
+  - dupl
+  - goconst
+  - gocyclo
+  - godox
+  - gosec
+  - interfacer
+  - lll
+  - maligned
+  - misspell
+  - prealloc
+  - stylecheck
+  - unconvert
+  - unparam
+  - errcheck
+  - golint
+  - gofmt
+  disable: []
+  fast: false
+
+issues:
+  exclude-use-default: false

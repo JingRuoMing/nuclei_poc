@@ -1,21 +1,28 @@
+
+arch:
+  - amd64
+  - ppc64le
 language: go
 
+os:
+  - linux
+  - osx
+
 go:
-  - 1.x
+  - 1.13.x
+  - 1.14.x
+  - 1.15.x
+  - master
 
 env:
-  - CGO_ENABLED=0
-
-install:
-  - go get -t ./...
-  - go get golang.org/x/lint/golint
-  - go get github.com/gordonklaus/ineffassign
+  - GO111MODULE=off
 
 script:
-  - diff <(echo -n) <(gofmt -s -d .)
-  - ineffassign .
-  - go vet ./...
-  - go test ./...
+  - diff <(gofmt -d .) <(printf "")
+  - go test -v -cpu=1,2,4 .
+  - go test -v -cpu=2 -race -short .
 
-after_script:
-  - golint ./...
+matrix:
+  allow_failures:
+    - go: 'master'
+  fast_finish: true 

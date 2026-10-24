@@ -1,34 +1,28 @@
+http:
+- matchers:
+  - part: body
+    type: word
+    words:
+    - Mirantis Kubernetes Engine
+  - status:
+    - 200
+    type: status
+  matchers-condition: and
+  method: GET
+  path:
+  - '{{BaseURL}}'
 id: kubernetes-mirantis
-
 info:
-  name: Detect Mirantis Kubernetes Engine
   author: pussycat0x
+  classification:
+    cvss-metrics: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N
+    cwe-id: CWE-200
+  description: Mirantis Kubernetes Engine panel was detected.
+  metadata:
+    fofa-query: app="Mirantis-Kubernetes-Engine"
+    max-request: 1
+    shodan-query: http.html:"Mirantis Kubernetes Engine"
+    verified: true
+  name: Mirantis Kubernetes Engine Panel - Detect
   severity: info
-  tags: tech,kubernetes
-#  additional-fields:
-#    fofa-dork: 'app="Mirantis-Kubernetes-Engine"'
-
-requests:
-  - payloads:
-      Subdomains: /home/mahmoud/Wordlist/AllSubdomains.txt
-    attack: sniper
-    threads: 100
-
-    raw:
-      - |
-        GET / HTTP/1.1
-        Host: {{Subdomains}}
-        User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0
-        Accept-Encoding: gzip, deflate
-        Accept: */*
-        
-    matchers-condition: and
-    matchers:
-      - type: word
-        part: body
-        words:
-          - "Mirantis Kubernetes Engine"
-
-      - type: status
-        status:
-          - 200
+  tags: tech,kubernetes,devops,kube,k8s,panel
