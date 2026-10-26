@@ -1,5 +1,4 @@
 id: gocd-workflow
-
 info:
   name: GoCD Security Checks
   author: dhiyaneshDk
@@ -8,4 +7,4 @@ info:
 workflows:
   - template: exposed-panels/gocd-login.yaml
     subtemplates:
-      - tags: gocd
+      -

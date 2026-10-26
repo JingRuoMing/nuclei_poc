@@ -5,7 +5,7 @@ info:
   author: pdp
   severity: low
   description: Detects common JavaScript environment configuration files.
-  tags: javascript,config,exposure
+ 
 
 requests:
   - method: GET
