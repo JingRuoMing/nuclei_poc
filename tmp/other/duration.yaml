@@ -1,19 +1,23 @@
-id: whois-duration
+id: dns-duration
 
 info:
-  name: WHOIS Duration
+  name: DNS Duration
   author: pdteam
   severity: info
 
-flow: whois("duration_whois")
+flow: dns("duration_dns")
 
-whois:
-  - id: duration_whois
-    query: "{{Host}}"
+dns:
+  - id: duration_dns
+    name: "{{FQDN}}"
+    type: A
+    class: inet
+    recursion: true
+    retries: 3
     matchers:
       - type: dsl
         condition: and
         dsl:
           - "duration > 0 && duration < 60"
-          - "duration_whois_duration > 0 && duration_whois_duration < 60"
-          - "duration == duration_whois_duration"
+          - "duration_dns_duration > 0 && duration_dns_duration < 60"
+          - "duration == duration_dns_duration"

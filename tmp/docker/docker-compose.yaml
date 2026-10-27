@@ -1,23 +1,65 @@
-version: '3.8'
-
 services:
-  emqx:
-    image: emqx/emqx:latest
-    container_name: emqx
-    ports:
-      - "1883:1883"   # MQTT
-      - "8083:8083"   # HTTP WebSocket
-      - "8084:8084"   # HTTPS WebSocket
-      - "8883:8883"   # MQTT over SSL
-      - "18083:18083" # Dashboard
+  morphody50:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile  
+    image: spectralnanodiamond/morphodynamicspipe:latest
+    container_name: morphody_container
     volumes:
-      - emqx_data:/opt/emqx/data
-      - emqx_log:/opt/emqx/log
+      - ./1_data/:/app/1_data
+      - ./2_segmentation/:/app/2_segmentation
+      - ./3a_tracking_info/:/app/3a_tracking_info
+      - ./3b_tracking_images/:/app/3b_tracking_images
+      - ./3c_tracking_images_filtered/:/app/3c_tracking_images_filtered
+      - ./4a_instantaneous_cell_morphodynamics/:/app/4a_instantaneous_cell_morphodynamics
+      - ./4b_time_averaged_cell_morphodynamics/:/app/4b_time_averaged_cell_morphodynamics
+      - ./5_tracking_images_outlines/:/app/5_tracking_images_outlines
+      - ./scripts/:/app/scripts
+      - ./requirements-base.txt:/app/requirements-base.txt:ro
+      - ./run_example.smk:/app/run_example.smk
+      - ./btrack_cell_config.json:/app/btrack_cell_config.json
+    working_dir: /app
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     environment:
-      - "EMQX_NODE_NAME=emqx@node1.emqx.io"
-      - "EMQX_CLUSTER__DISCOVERY_STRATEGY=static"
-      - "EMQX_CLUSTER__STATIC__SEEDS=[emqx@node1.emqx.io]"
-
-volumes:
-  emqx_data:
-  emqx_log:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    command: >
+      bash -c "pwd && ls -l && conda init && snakemake -s run_example.smk --cores 1 --keep-going"
+  morphody50-cpu:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    image: spectralnanodiamond/morphodynamicspipe:latest
+    container_name: morphody_container
+    volumes:
+      - ./1_data/:/app/1_data:ro
+      - ./2_segmentation/:/app/2_segmentation
+      - ./3a_tracking_info/:/app/3a_tracking_info
+      - ./3b_tracking_images/:/app/3b_tracking_images
+      - ./3c_tracking_images_filtered/:/app/3c_tracking_images_filtered
+      - ./4a_instantaneous_cell_morphodynamics/:/app/4a_instantaneous_cell_morphodynamics
+      - ./4b_time_averaged_cell_morphodynamics/:/app/4b_time_averaged_cell_morphodynamics
+      - ./5_tracking_images_outlines/:/app/5_tracking_images_outlines
+      - ./scripts/:/app/scripts
+      - ./requirements-base.txt:/app/requirements-base.txt:ro
+      - ./run_example.smk:/app/run_example.smk
+      - ./btrack_cell_config.json:/app/btrack_cell_config.json
+    working_dir: /app
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    command: >
+      bash -c "pwd && ls -l && conda init && snakemake -s run_example.smk --cores 1 --keep-going"

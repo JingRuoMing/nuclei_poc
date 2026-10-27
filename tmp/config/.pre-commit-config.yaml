@@ -1,27 +1,61 @@
-# See https://pre-commit.com for more information
-# Install: pip install pre-commit && pre-commit install
-repos:
-  - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.9.0
-    hooks:
-      - id: shellcheck
-        args: ["--severity=error"]
-        files: \.(sh|bash)$
-        exclude: ^tests/mocks/
+default_install_hook_types: [pre-commit, commit-msg]
 
-  - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.7.0-1
+repos:
+  - repo: builtin
     hooks:
-      - id: shfmt
-        args: ["-i", "4", "-ci", "-bn"]
-        files: \.(sh|bash)$
-        exclude: ^tests/mocks/
+      - id: check-case-conflict
+      - id: check-symlinks
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
 
   - repo: local
     hooks:
-      - id: bats-tests
-        name: Run bats tests
-        entry: bash -c 'bats tests/unit/'
+      - id: vp-staged
+        name: Format, lint and type-check staged files (vp staged)
+        # Task list lives in vite.config.ts `staged`. vp receives the staged set from git
+        # itself, so pass_filenames stays off and the hook only needs to fire once per commit.
+        entry: env PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false pnpm exec vp staged --no-stash
         language: system
         pass_filenames: false
-        files: \.(sh|bash|bats)$
+        stages: [pre-commit]
+
+  - repo: local
+    hooks:
+      - id: check-element-data
+        name: Validate element data JSON
+        # Element data ships gzipped and check-jsonschema can't read .gz, so decompress
+        # onto stdin (`-`). The previous `files: data.json` pattern matched nothing, which
+        # silently disabled this check.
+        entry: bash -c 'gunzip -c src/lib/element/data.json.gz | check-jsonschema --schemafile src/lib/element/data.schema.json -'
+        language: python
+        additional_dependencies: [check-jsonschema==0.37.4]
+        files: ^src/lib/element/data\.(json\.gz|schema\.json)$
+        pass_filenames: false
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.3
+    hooks:
+      - id: codespell
+        stages: [pre-commit, commit-msg]
+        args:
+          - --ignore-words-list
+          # statics: static (single-point) calculations
+          # conect: PDB bond-connectivity record name; trough: a dip in a curve
+          # skelton: Jonathan Michael Skelton, author of the cited Phonopy-Spectroscopy
+          # cna: common neighbor analysis; mater: journal abbreviation (Acta Mater.); afterall: Vitest lifecycle hook
+          # coo: the formula CoO (cobalt(II) oxide); startin: File System Access API's startIn option
+          # ser: PDB residue name of serine
+          - 'te,ba,nd,ore,claus,manuel,ges,mey,curvelinear,tennant,struc,slac,statics,conect,trough,skelton,cna,mater,afterall,coo,startin,ser'
+          - --check-filenames
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.49.1
+    hooks:
+      - id: markdownlint
+        # MD013: line too long
+        # MD033: no inline HTML
+        # MD041: first line in a file should be a top-level heading
+        args: [--disable, MD013, MD033, MD041, '--']
+        exclude: changelog\.md$

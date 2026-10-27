@@ -1,77 +1,285 @@
 name: CI
 
+# Lint, type-check and test. Also reused by publish.yml (workflow_call) as the release gate.
+# The docs site build/deploy stays in gh-pages.yml: it needs pages/id-token permissions that a
+# reusable-workflow call from publish.yml (contents: read) could not grant.
 on:
   push:
-    branches: [master, main]
+    branches: [main]
   pull_request:
-    branches: [master, main]
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  # Reusable calls keep the caller's event and workflow name. Give each release run its
+  # own group so dispatching another version cannot cancel or replace its CI gate.
+  # Pushes to an open PR (synchronize) use their own group (see e2e-gate), so they cannot cancel
+  # the E2E run that started when the PR was opened or reopened.
+  group: ${{ github.workflow }}-${{ github.workflow == 'CI' && (github.event.pull_request.number || github.ref) || github.run_id }}${{ github.event.action == 'synchronize' && '-sync' || '' }}
+  cancel-in-progress: ${{ github.workflow == 'CI' }}
 
 jobs:
-  test:
+  prek:
+    name: Lint and type-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+      # install extension deps too: vscode is type-aware linted by root oxlint
+      # (needs e.g. @types/vscode), anywidget is checked by root svelte-check
+      # (needs its matterviz/* subpath imports to resolve, else TS2882)
+      - name: Install dependencies
+        uses: ./.github/actions/setup
+        with:
+          extensions: vscode anywidget jupyterlab
+          build-package: 'false'
+      # Locally the vp-staged hook checks only staged files; with nothing staged (CI) it is a
+      # no-op, so the repo-wide format/lint/type-aware pass runs explicitly here.
+      - name: Format, lint and type-check the whole repo
+        run: |
+          pnpm exec vp check
+          pnpm typecheck
+      - name: Run prek checks
+        uses: j178/prek-action@main
+
+      # The root tsconfig excludes extensions/, and `vp build` strips types without
+      # checking them, so extensions/vscode/tsconfig.json never ran anywhere. The
+      # extension imports #lib types directly (file-viewer/eligibility, io/decompress,
+      # trajectory/format-detect), so a change to a shared type broke it silently -
+      # e.g. making HostFileRequest.filename required produced four errors nothing caught.
+      - name: Type-check and test VS Code extension
+        run: |
+          pnpm -C extensions/vscode run typecheck
+          pnpm -C extensions/vscode test
+
+      # Its settings and custom-editor selectors are generated from #lib, but only by a local
+      # prebuild, so a change to the shared lists could land with package.json left behind.
+      - name: Check VS Code package.json is in sync with #lib
+        run: pnpm -C extensions/vscode run sync-config -- --check
+
+      # Same blind spot as vscode: this tsconfig ran nowhere.
+      - name: Type-check and test JupyterLab extension
+        run: |
+          pnpm -C extensions/jupyterlab run typecheck
+          pnpm -C extensions/jupyterlab test
+
+      # The widget passes component props by name from a table; a renamed or removed prop
+      # (e.g. BarPlot.point_tween) went stale silently until this ran somewhere.
+      - name: Type-check anywidget
+        run: pnpm -C extensions/anywidget run typecheck
+
+  publint:
+    name: Validate npm package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+
+      - name: Install dependencies
+        uses: ./.github/actions/setup
+        with:
+          test-cache: package
+
+      # publint checks that every export target exists, so build dist/ first
+      - name: Build and validate package exports and types
+        run: |
+          pnpm package:dist
+          pnpm run publint
+      - name: Test package exports and check unused code
+        run: |
+          pnpm exec vitest run tests/vitest/package-exports.test.ts --fsModuleCache --fsModuleCachePath=.cache/vitest
+          pnpm run knip
+
+  unit-test-shards:
+    name: Unit tests (shard ${{ matrix.shard }}/4)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        go-version: ['1.11', '1.17', '1.24']
-
+        shard: [1, 2, 3, 4]
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v5
+      - name: Checkout source
+        uses: actions/checkout@v7
+      - name: Install dependencies
+        uses: ./.github/actions/setup
         with:
-          go-version: ${{ matrix.go-version }}
+          test-cache: ${{ matrix.shard }}
+      - name: Run unit tests
+        # Built-output checks run once in publint; the remaining tests import source files.
+        run: pnpm exec vitest run --exclude=tests/vitest/package-exports.test.ts --shard=${{ matrix.shard }}/4 --maxWorkers=100% --fsModuleCache --fsModuleCachePath=.cache/vitest
 
-      - name: Enable Go modules (go 1.11)
-        if: matrix.go-version == '1.11'
-        run: echo "GO111MODULE=on" >> $GITHUB_ENV
+  # Calibrate timing stability on main/manual runs before making this a PR or release gate.
+  performance:
+    name: Performance baselines
+    if: github.workflow == 'CI' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+        with:
+          test-cache: performance
+      - name: Run isolated performance baselines
+        env:
+          MATTERVIZ_PERF: '1'
+        run: pnpm exec vitest run tests/vitest/perf-baselines.test.ts --maxWorkers=1 --no-file-parallelism --fsModuleCache --fsModuleCachePath=.cache/vitest --reporter=verbose --silent=false
 
-      - name: Build
+  # Keep the required check name and fail if any shard fails or is cancelled/skipped.
+  unit-tests:
+    name: Unit tests
+    if: always()
+    needs: [unit-test-shards, publint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all unit test shards
+        env:
+          RESULT: ${{ needs.unit-test-shards.result == 'success' && needs.publint.result == 'success' && 'success' || 'failure' }}
+        run: test "$RESULT" = success
+
+  # The full E2E suite (~15 min) runs when a PR is opened or reopened, on merge to main, on
+  # manual dispatch and as the release gate. Later pushes to an open PR (synchronize) skip it
+  # only while the PR's latest decided E2E gate passed: once it fails (or before any run has
+  # decided), every push runs E2E until it passes, so a red E2E can't turn green by skipping.
+  e2e-gate:
+    name: Decide whether E2E runs
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+    steps:
+      - id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACTION: ${{ github.event.action }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          if [ "${{ matrix.go-version }}" = "1.11" ]; then
-            go build $(go list ./... | grep -v /cmd/)
-          else
-            go build ./...
+          run=true
+          if [ "$ACTION" = synchronize ]; then
+            # newest first. A run decides once any E2E job failed (even while its other jobs
+            # still run) or its E2E gate passed; running ones without a failure decide nothing.
+            # Cancelled runs are skipped outright: their always() E2E aggregator job fails, which
+            # would read as a failed gate. Manually dispatched full runs of the branch count like
+            # PR runs; the head repo filter drops a fork's same-named branch and base-repo
+            # dispatches for fork PRs alike.
+            for id in $(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?branch=$HEAD_REF&per_page=30" \
+              --jq ".workflow_runs[] | select(.id != $GITHUB_RUN_ID and (.event == \"pull_request\" or .event == \"workflow_dispatch\") and .head_repository.full_name == \"$HEAD_REPO\" and .conclusion != \"cancelled\") | .id"); do
+              gate=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$id/jobs?per_page=100" \
+                --jq '[.jobs[] | select(.name | startswith("E2E"))] | if any(.conclusion == "failure") then "failure" elif any(.name == "E2E tests (shard 1/4)" and .conclusion == "success") then "success" else "" end')
+              if [ "$gate" = success ]; then run=false; break; fi
+              if [ "$gate" = failure ]; then break; fi
+            done
           fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
 
-      - name: Vet
-        if: matrix.go-version != '1.11'
-        run: go vet ./...
+  build-site:
+    name: Build browser test site
+    needs: e2e-gate
+    if: needs.e2e-gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Build production site
+        run: pnpm exec vp build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: browser-test-site
+          path: .svelte-kit/output/
+          include-hidden-files: true
+          retention-days: 1
 
-      - name: Test
+  e2e-source:
+    name: E2E source inspection
+    needs: e2e-gate
+    if: needs.e2e-gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: pnpm exec playwright install chromium --no-shell
+      # Linux headless WebGPU presents transparent canvases, including drawImage captures.
+      - run: xvfb-run -a pnpm exec playwright test --headed
+        env:
+          MATTERVIZ_E2E_MODE: source
+          DEBUG: pw:browser
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-traces-source
+          path: test-results/
+          retention-days: 7
+
+  e2e-test-shards:
+    name: E2E production (shard ${{ matrix.shard }}/6)
+    needs: build-site
+    runs-on: ubuntu-latest
+    timeout-minutes: 40 # the slowest shard takes ~20 min
+    strategy:
+      fail-fast: false # let every shard finish so we see all failures, not just the first
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+      - name: Install dependencies
+        uses: ./.github/actions/setup
+      - name: Install Chromium
+        run: pnpm exec playwright install chromium --no-shell
+      # FFmpeg's .deb files come from a cache: the runner's apt mirror stalls mid-download often
+      # enough to time out whole shards, and the first shard that fetches them saves them
+      - name: Cache FFmpeg packages
+        uses: actions/cache@v6
+        with:
+          path: ~/apt-archives
+          key: ffmpeg-debs-${{ runner.os }}-${{ runner.arch }}-v1
+      # Bounded: an unresponsive apt mirror once hung shards 3 and 6 until the 6 h job limit
+      - name: Install FFmpeg for movie export tests
+        timeout-minutes: 5
         run: |
-          if [ "${{ matrix.go-version }}" = "1.11" ]; then
-            go test $(go list ./... | grep -v /cmd/) -v -count=1 -timeout=180s
-          else
-            go test ./... -v -count=1 -timeout=180s
-          fi
+          mkdir -p ~/apt-archives/partial
+          APT_OPTS=(-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30)
+          sudo apt-get "${APT_OPTS[@]}" update
+          sudo apt-get "${APT_OPTS[@]}" -o Dir::Cache::Archives="$HOME/apt-archives" \
+            install --yes --no-install-recommends ffmpeg
+          # apt downloads as root; the cache step saves the archives as the runner user
+          sudo chown -R "$USER" ~/apt-archives
+      - uses: actions/download-artifact@v8
+        with:
+          name: browser-test-site
+          path: .svelte-kit/output/
+      - name: Run E2E tests
+        run: xvfb-run -a pnpm exec playwright test --headed --shard=${{ matrix.shard }}/6
+        env:
+          MATTERVIZ_E2E_MODE: preview
+          DEBUG: pw:browser
+      - name: Upload failure traces
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-traces-shard-${{ matrix.shard }}
+          path: test-results/
+          retention-days: 7
 
-      - name: Test JSON build
-        run: |
-          if [ "${{ matrix.go-version }}" = "1.11" ]; then
-            go test -tags json $(go list ./... | grep -v /cmd/) -v -count=1 -timeout=180s
-          else
-            go test -tags json ./... -v -count=1 -timeout=180s
-          fi
-
-      # operators/full requires go 1.24 (gojq, htmlquery, xmlquery).
-      - name: Test operators/full submodule
-        if: matrix.go-version == '1.24'
-        working-directory: operators/full
-        run: |
-          go build ./...
-          go vet ./...
-          go test ./... -v -count=1 -timeout=120s
-
-      # common/tlsx/full requires go 1.18+ (cfssl revocation backend).
-      - name: Test common/tlsx/full submodule
-        if: matrix.go-version == '1.24'
-        working-directory: common/tlsx/full
-        run: |
-          go build ./...
-          go vet ./...
-          go test ./... -v -count=1 -timeout=120s
-
-      - name: Test live match (xpoc examples)
-        if: matrix.go-version == '1.24'
-        run: NEUTRON_LIVE_MATCH=1 go test ./templates/ -run TestXpocExamplesLiveMatch -v -count=1 -timeout=300s
+  # These four names are required by the main ruleset (e2e-gate reads shard 1's). Each gates
+  # the complete matrix and accepts skipped E2E jobs only when e2e-gate skipped them on purpose.
+  e2e-tests:
+    name: E2E tests (shard ${{ matrix.shard }}/4)
+    if: always()
+    needs: [e2e-gate, e2e-test-shards, e2e-source]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - name: Require all E2E test shards
+        env:
+          RESULT: ${{ ((needs.e2e-test-shards.result == 'success' && needs.e2e-source.result == 'success') || (needs.e2e-gate.outputs.run == 'false' && needs.e2e-test-shards.result == 'skipped' && needs.e2e-source.result == 'skipped')) && 'success' || 'failure' }}
+        run: test "$RESULT" = success

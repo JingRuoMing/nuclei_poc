@@ -6,16 +6,17 @@ info:
   severity: info
   metadata:
     fofa-query:
-    - icon_hash="-1446811182" || icon_hash="-717082057"
+    - title="blinko"
     product: blinko
-    vendor: blinko-space
+    shodan-query:
+    - http.title:"blinko"
+    vendor: blinkospace
     verified: true
 http:
 - method: GET
   path:
   - '{{BaseURL}}/'
   matchers:
-  - type: favicon
-    hash:
-    - '-1446811182'
-    - '-717082057'
+  - type: regex
+    regex:
+    - (?mi)<title[^>]*>blinko.*?</title>

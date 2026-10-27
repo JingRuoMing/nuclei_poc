@@ -1,35 +1,48 @@
 version: 2
 updates:
-  - package-ecosystem: gomod
+  - package-ecosystem: "gomod"
     directory: "/"
     schedule:
-      interval: weekly
-      day: monday
-      time: "04:00"
-      timezone: Asia/Shanghai
-    open-pull-requests-limit: 10
-    labels:
-      - dependencies
-      - go
+      interval: "weekly"
+    target-branch: "dev"
     commit-message:
-      prefix: deps
+      prefix: "chore"
+      include: "scope"
+    allow:
+      - dependency-name: "github.com/projectdiscovery/*"
     groups:
-      golang-x:
-        patterns:
-          - "golang.org/x/*"
-      chainreactors:
-        patterns:
-          - "github.com/chainreactors/*"
+      modules:
+        patterns: ["github.com/projectdiscovery/*"]
+      security:
+        applies-to: "security-updates"
+        patterns: ["*"]
+        exclude-patterns: ["github.com/projectdiscovery/*"]
+    labels:
+      - "Type: Maintenance"
 
-  - package-ecosystem: github-actions
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: weekly
-      day: monday
-      time: "04:30"
-      timezone: Asia/Shanghai
-    labels:
-      - dependencies
-      - github-actions
+      interval: "weekly"
+    target-branch: "dev"
     commit-message:
-      prefix: deps
+      prefix: "chore"
+      include: "scope"
+    groups:
+      workflows:
+        patterns: ["*"]
+        exclude-patterns: ["projectdiscovery/actions/*"]
+    labels:
+      - "Type: Maintenance"
+
+#  # Maintain dependencies for docker
+#  - package-ecosystem: "docker"
+#    directory: "/"
+#    schedule:
+#      interval: "weekly"
+#    target-branch: "dev"
+#    commit-message:
+#      prefix: "chore"
+#      include: "scope"
+#    labels:
+#      - "Type: Maintenance"

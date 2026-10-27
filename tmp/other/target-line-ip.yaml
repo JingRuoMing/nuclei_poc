@@ -1,20 +1,25 @@
-id: target-line-ip
+id: javascript-target-line-ip
 
 info:
-  name: Target Line IP
+  name: JavaScript Target Line IP
   author: pdteam
   severity: info
 
-http:
-  - method: GET
-    path:
-      - "{{BaseURL}}"
-    matchers:
-      - type: word
-        words:
-          - "host=pinned.test:"
+javascript:
+  - code: |
+      var m = require("nuclei/net");
+      var conn = m.Open("tcp", address);
+      conn.SetTimeout(timeout);
+      conn.RecvString(3)
+
+    args:
+      address: "{{Host}}:{{Port}}"
+      Host: "{{Host}}"
+      Port: 5431
+      timeout: 3
+
     extractors:
       - type: regex
-        group: 1
+        part: response
         regex:
-          - "server=([a-z]+)"
+          - "[a-z]+"
