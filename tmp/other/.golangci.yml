@@ -1,27 +1,32 @@
-run:
 linters-settings:
+  golint:
+    min-confidence: 0
+
+  misspell:
+    locale: US
+
 linters:
   disable-all: true
   enable:
-    - asciicheck
-    - deadcode
-    - exhaustive
-    - exportloopref
-    - goconst
-    - gofmt # redundant, since gofmt *should* be a no-op after gofumpt
-    - gofumpt
+    - typecheck
     - goimports
-    - gosimple
-    - ineffassign
     - misspell
-    - prealloc
-    - scopelint
-    - staticcheck
-    - stylecheck
-    - structcheck
-    - unconvert
+    - govet
+    - golint
+    - ineffassign
+    - gosimple
+    - deadcode
     - unparam
     - unused
-    - varcheck
-    - vet
+    - structcheck
+    - prealloc
+    - maligned
+    - unconvert
 
+issues:
+  exclude-use-default: false
+  exclude:
+      - should have a package comment
+      - error strings should not be capitalized or end with punctuation or a newline
+service:
+  golangci-lint-version: 1.35.0 # use the fixed version to not introduce new linters unexpectedly
