@@ -1,22 +1,25 @@
-http:
-- host-redirects: true
-  matchers:
-  - condition: or
-    part: body
-    type: word
-    words:
-    - sap-system-login
-    - <title>Logon</title>
-  max-redirects: 2
-  method: GET
-  path:
-  - '{{BaseURL}}/sap/bc/gui/sap/its/webgui'
-id: sap-netweaver-webgui
+id: sap-nw-webgui
+
 info:
-  author: randomstr1ng
-  description: Detection of SAP NetWeaver ABAP Webserver WebGUI
-  metadata:
-    max-request: 1
   name: SAP NetWeaver WebGUI Detection
+  author: randomstr1ng
   severity: info
-  tags: sap,webserver,tech,discovery
+  description: Detection of SAP NetWeaver ABAP Webserver WebGUI
+  tags: sap,webserver
+  metadata: 
+  mongoid: 0000
+
+requests:
+  - method: GET
+    path:
+      - "{{BaseURL}}/sap/bc/gui/sap/its/webgui"
+
+    redirects: true
+    max-redirects: 2
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "sap-system-login"
+          - "<title>Logon</title>"
+        condition: or

@@ -9,14 +9,9 @@ info:
     - https://owasp.org/www-community/attacks/Credential_stuffing
   metadata:
     max-request: 2
-  tags: cloud,creds-stuffing,login-check,github,vuln
+  tags: cloud,creds-stuffing,login-check,github
 
 self-contained: true
-
-flow: |
-  if (template["username"] && template["password"]) {
-    http();
-  }
 
 http:
   - raw:
@@ -77,4 +72,4 @@ http:
           - "contains(to_lower(header), 'set-cookie: user_session=')"
           - "status_code==302"
         condition: and
-# digest: 4b0a00483046022100e197e5c00cc5d3c17bd31b8766504d472a1cccc67a9e436ea8c66cf2cd32bc5f022100f082b2b61433dc6df779936d28b391c6f38c5f459a72615090680a4a07ba7c6c:922c64590222798bb761d5b6d8e72950
+# digest: 490a00463044022032da6a74ed4e674bc4b66b66765724ee259c4df8ef05e9bc98de8ccc3f4ebfd202205a0376f01efcde43398c419330041e7fe45717e8ad8c3bf457c79739f730617a:922c64590222798bb761d5b6d8e72950

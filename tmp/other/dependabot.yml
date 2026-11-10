@@ -1,48 +1,25 @@
+# Every ecosystem below carries a 7-day cooldown: a brand-new release can be
+# malicious or simply broken, and nothing here is urgent enough to take on the
+# day it ships. Dependabot security updates bypass the cooldown.
 version: 2
 updates:
-  - package-ecosystem: "gomod"
+  - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
-    target-branch: "dev"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    allow:
-      - dependency-name: "github.com/projectdiscovery/*"
-    groups:
-      modules:
-        patterns: ["github.com/projectdiscovery/*"]
-      security:
-        applies-to: "security-updates"
-        patterns: ["*"]
-        exclude-patterns: ["github.com/projectdiscovery/*"]
-    labels:
-      - "Type: Maintenance"
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-    target-branch: "dev"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    groups:
-      workflows:
-        patterns: ["*"]
-        exclude-patterns: ["projectdiscovery/actions/*"]
-    labels:
-      - "Type: Maintenance"
-
-#  # Maintain dependencies for docker
-#  - package-ecosystem: "docker"
-#    directory: "/"
-#    schedule:
-#      interval: "weekly"
-#    target-branch: "dev"
-#    commit-message:
-#      prefix: "chore"
-#      include: "scope"
-#    labels:
-#      - "Type: Maintenance"
+    cooldown:
+      default-days: 7

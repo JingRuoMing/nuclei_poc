@@ -9,7 +9,7 @@ info:
     - https://aws.amazon.com/cli/
   metadata:
     max-request: 2
-  tags: cloud,devops,aws,amazon,aws-cloud-config
+  tags: cloud,devops,aws,amazone,aws-cloud-config
 
 variables:
   region: "us-east-1"
@@ -52,4 +52,4 @@ code:
       - type: dsl
         dsl:
           - '"AWS CLI is properly configured for account \"" + account + "\" and all the necessary tools required are installed"'
-# digest: 490a0046304402202d1c1289391a00e7c7e4717dc091d105bb40020c400002f44af89fa67ff431d202200a64b98e6e7320777442ace34db91831c6f055b4ca0cc6ccf7d0a4952075c75b:922c64590222798bb761d5b6d8e72950
+# digest: 4b0a00483046022100c79a6583acb05a00dfa742962972031f8c42ae9ce85aabc1c9edb1ae7ebd9368022100b98762cb406a952a4115e28bb639f0d16d02e0b737012da638e3bf3f5d73f5f5:922c64590222798bb761d5b6d8e72950

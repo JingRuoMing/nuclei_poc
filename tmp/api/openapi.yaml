@@ -131,7 +131,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Successfully created user
+          description: Sucessfully created user
           content:
             application/json:
               schema:
@@ -170,7 +170,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Successfully logged in user
+          description: Sucessfully logged in user
           content:
             application/json:
                 schema:
@@ -262,7 +262,7 @@ paths:
             example: 'name1'
       responses:
         '200':
-          description: Successfully deleted user
+          description: Sucessfully deleted user
           content:
             application/json:
               schema:
@@ -331,7 +331,7 @@ paths:
         required: true
       responses:
         '204':
-          description: Successfully updated user email
+          description: Sucessfully updated user email
           content: {}
         '400':
           description: Invalid request
@@ -389,7 +389,7 @@ paths:
         required: true
       responses:
         '204':
-          description: Successfully updated users password
+          description: Sucessfully updated users password
           content: {}
         '400':
           description: Invalid request
@@ -475,7 +475,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Successfully added a book
+          description: Sucessfully added a book
           content:
             application/json:
               schema:

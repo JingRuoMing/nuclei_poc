@@ -6,15 +6,14 @@ info:
   severity: medium
   metadata:
     max-request: 1
-  tags: redirect,dast,vuln
+  tags: redirect,dast
 
 http:
   - pre-condition:
       - type: dsl
         dsl:
           - 'method == "GET"'
-          - 'method == "POST"'
-          - 'method == "PUT"'
+
     payloads:
       redirect:
         - "{{Hostname}}.oast.me"
@@ -37,7 +36,6 @@ http:
         - '%5coast.me/%2f%2e%2e'
         - '%5c{{RootURL}}oast.me/%2f%2e%2e'
         - '../oast.me'
-        - '/..//oast.me'
         - '.oast.me'
         - '/%5coast.me'
         - '////\;@oast.me'
@@ -125,9 +123,7 @@ http:
         - '%00/oast.me/'
 
     fuzzing:
-      - parts:
-          - query
-          - body
+      - part: query
         mode: single
         keys:
           - AuthState
@@ -269,9 +265,7 @@ http:
         fuzz:
           - "{{redirect}}"
 
-      - parts:
-          - query
-          - body
+      - part: query
         mode: single
         values:
           - "https?://" # Replace HTTP URLs with alternatives
@@ -291,4 +285,4 @@ http:
           - 301
           - 302
           - 307
-# digest: 4a0a00473045022003ede4debd8cf83546e8debad1d919bab1d2003890c35b4c61d133e1f1e58871022100aae983ead62d5befcdec4a8788ffe391a5cda4aea6c17a6c603d91127523d12c:922c64590222798bb761d5b6d8e72950
+# digest: 4a0a0047304502204ebf924d723493c365c9d4d32ba03204835540154f662dfb94b7579f9aad14b9022100e40c6596ab385687b5c2804d8e487496a1ba5835f9cba5d1a8cec27e3f3fab1d:922c64590222798bb761d5b6d8e72950

@@ -1,90 +1,69 @@
-name: Setup
-description: Node 24 + pnpm, root install, and optional extension installs
-
+name: "Get number of shards"
+description: "Get the number of nf-test shards for the current CI job"
 inputs:
-  extensions:
-    description: Space-separated extension dirs under extensions/ to also install
-    default: ''
-  build-package:
-    description: Build anywidget's local matterviz dependency (type checks use source aliases)
-    default: 'true'
-  test-cache:
-    description: Separate Vitest compilation cache for this suite or shard
-    default: ''
-
+  max_shards:
+    description: "Maximum number of shards allowed"
+    required: true
+  paths:
+    description: "Component paths to test"
+    required: false
+  tags:
+    description: "Tags to pass as argument for nf-test --tag parameter"
+    required: false
+outputs:
+  shard:
+    description: "Array of shard numbers"
+    value: ${{ steps.shards.outputs.shard }}
+  total_shards:
+    description: "Total number of shards"
+    value: ${{ steps.shards.outputs.total_shards }}
 runs:
-  using: composite
+  using: "composite"
   steps:
-    - uses: actions/setup-node@v7
+    - name: Install nf-test
+      uses: nf-core/setup-nf-test@v1
       with:
-        node-version: 24
-    - name: Enable pnpm
+        version: ${{ env.NFT_VER }}
+    - name: Get number of shards
+      id: shards
       shell: bash
       run: |
-        corepack enable
-        # Node validates bytecode against the source and Node version before reusing it.
-        echo "NODE_COMPILE_CACHE=$HOME/.cache/node-compile" >> "$GITHUB_ENV"
-        # Install explicitly below; don't resolve dependencies again before every command.
-        echo "PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false" >> "$GITHUB_ENV"
-        # vite-plus 1.1's Rolldown deadlocks on this site's client build with its default pool on
-        # 4-vCPU runners (all workers idle on futexes); a larger pool builds in seconds. Rolldown
-        # reads it at startup, so it must be in the environment, not vite.config.ts.
-        echo "ROLLDOWN_WORKER_THREADS=16" >> "$GITHUB_ENV"
-    - name: Cache dependency downloads
-      uses: actions/cache@v6
-      with:
-        path: |
-          ~/.local/share/pnpm/store
-          ~/.npm
-          ~/.cache/node-compile
-        key: deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('package.json', 'extensions/*/package.json') }}-${{ github.sha }}
-        restore-keys: deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('package.json', 'extensions/*/package.json') }}-
-    - shell: bash
-      env:
-        EXTENSIONS: ${{ inputs.extensions }}
-        BUILD_PACKAGE: ${{ inputs.build-package }}
-        # Root `prepare` (src/scripts/prepare.mjs) builds dist/ when it is missing so git
-        # dependencies (github:janosh/matterviz#main) install usable; jobs here build it
-        # explicitly where they need it, so skip the ~20 s svelte-package run on install.
-        MATTERVIZ_SKIP_PREPARE: 1
-      run: |
-        # Git dependencies need prepare; generate the allowlist in CI.
-        printf 'allowBuilds:\n  svelte-widgets: true\n' > pnpm-workspace.yaml
-        # Registry packages ship their generated artifacts, so their prepare scripts do not
-        # need to run. Keep their skipped builds non-fatal.
-        # Resolve moving Git branches afresh instead of reusing a previous lockfile's commit.
-        # pnpm prepares svelte-widgets with npm, whose peer resolver rejects its Vitest 5
-        # alongside vite-plus's optional Vitest 4 browser peers. Uppercase survives pnpm's
-        # lifecycle env filtering; pnpm still checks peers and runs the package's prepare.
-        NPM_CONFIG_LEGACY_PEER_DEPS=true pnpm install --no-lockfile --config.strict-dep-builds=false
-        # anywidget links the root package (`matterviz: link:../..`) and bundles its dist/, which
-        # only the root's svelte-package run builds (dependencies never run `prepare`).
-        if [ "$BUILD_PACKAGE" = true ]; then
-          case " $EXTENSIONS " in *" anywidget "*) pnpm package:dist ;; esac
+        # Run nf-test with dynamic parameter
+        nftest_output=$(nf-test test \
+          --profile +docker \
+          $(if [ -n "${{ inputs.tags }}" ]; then echo "--tag ${{ inputs.tags }}"; fi) \
+          --dry-run \
+          --ci \
+          --changed-since HEAD^) || {
+            echo "nf-test command failed with exit code $?"
+            echo "Full output: $nftest_output"
+            exit 1
+        }
+        echo "nf-test dry-run output: $nftest_output"
+
+        # Default values for shard and total_shards
+        shard="[]"
+        total_shards=0
+
+        # Check if there are related tests
+        if echo "$nftest_output" | grep -q 'No tests to execute'; then
+          echo "No related tests found."
+        else
+          # Extract the number of related tests
+          number_of_shards=$(echo "$nftest_output" | sed -n 's|.*Executed \([0-9]*\) tests.*|\1|p')
+          if [[ -n "$number_of_shards" && "$number_of_shards" -gt 0 ]]; then
+            shards_to_run=$(( $number_of_shards < ${{ inputs.max_shards }} ? $number_of_shards : ${{ inputs.max_shards }} ))
+            shard=$(seq 1 "$shards_to_run" | jq -R . | jq -c -s .)
+            total_shards="$shards_to_run"
+          else
+            echo "Unexpected output format. Falling back to default values."
+          fi
         fi
-        # --ignore-workspace: a freshly released dep trips pnpm's cooldown
-        # (minimumReleaseAge), auto-creating a pnpm-workspace.yaml that makes these
-        # standalone extension installs no-ops (skipping anywidget/@types/node/matterviz).
-        # strict-dep-builds: JupyterLab's fontawesome ships built artifacts, so its skipped
-        # lifecycle script is safe. anywidget links the root's svelte-widgets instead of
-        # fetching and preparing its own Git copy.
-        for ext in $EXTENSIONS; do
-          if [ "$ext" = vscode ]; then strict_builds=true; else strict_builds=false; fi
-          pnpm -C "extensions/$ext" install --no-lockfile --ignore-workspace \
-            --config.strict-dep-builds="$strict_builds"
-        done
-    - name: Cache test compilation
-      if: inputs.test-cache != ''
-      uses: actions/cache@v6
-      with:
-        path: |
-          .cache/node-compile
-          .cache/vitest
-        # The installed graph includes resolved Git SHAs. Include custom compiler plugins;
-        # Vitest hashes each source file and excludes import.meta.glob from its cache.
-        key: vitest-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('node_modules/.pnpm/lock.yaml', 'vite.config.ts', 'package.json', 'src/vite-plugins.ts', 'src/scripts/**') }}-${{ inputs.test-cache }}-${{ github.sha }}
-        restore-keys: vitest-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('node_modules/.pnpm/lock.yaml', 'vite.config.ts', 'package.json', 'src/vite-plugins.ts', 'src/scripts/**') }}-${{ inputs.test-cache }}-
-    - name: Enable cached test compilation
-      if: inputs.test-cache != ''
-      shell: bash
-      run: echo "NODE_COMPILE_CACHE=$GITHUB_WORKSPACE/.cache/node-compile" >> "$GITHUB_ENV"
+
+        # Write to GitHub Actions outputs
+        echo "shard=$shard" >> $GITHUB_OUTPUT
+        echo "total_shards=$total_shards" >> $GITHUB_OUTPUT
+
+        # Debugging output
+        echo "Final shard array: $shard"
+        echo "Total number of shards: $total_shards"

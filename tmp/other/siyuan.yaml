@@ -8,7 +8,7 @@ info:
     product: siyuan
     shodan-query:
     - http.favicon.hash:-1450125239
-    vendor: siyuan-note
+    vendor: b3log
     verified: true
 http:
 - method: GET
