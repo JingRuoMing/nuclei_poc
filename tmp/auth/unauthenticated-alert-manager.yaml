@@ -1,23 +1,33 @@
-http:
-- matchers:
-  - type: word
-    words:
-    - <title>Alertmanager</title>
-  - status:
-    - 200
-    type: status
-  matchers-condition: and
-  method: GET
-  path:
-  - '{{BaseURL}}/#/alerts'
 id: unauthenticated-alert-manager
+
 info:
+  name: Unauthenticated Alert Manager
   author: dhiyaneshDK
-  description: Alert Manager was able to be accessed with no authentication requirements
-    in place.
-  metadata:
-    max-request: 1
-    shodan-query: http.title:"Alertmanager"
-  name: Alert Manager - Unauthenticated Access
   severity: high
-  tags: unauth,alertmanager,misconfig
+  reference: https://www.shodan.io/search?query=http.title%3A%22Alertmanager%22
+  tags: unauth,alertmanager
+
+requests:
+  - payloads:
+      Subdomains: /home/mahmoud/Wordlist/AllSubdomains.txt
+
+    attack: sniper
+    threads: 100
+    raw:
+    - |+
+      GET /#/alerts HTTP/1.1
+      Host: {{Subdomains}}
+      User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0
+      Accept-Encoding: gzip, deflate
+      Accept: */*
+      
+    unsafe: true
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - '<title>Alertmanager</title>'
+
+      - type: status
+        status:
+          - 200

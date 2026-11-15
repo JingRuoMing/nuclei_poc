@@ -1,30 +1,36 @@
-http:
-- matchers:
-  - condition: and
-    type: word
-    words:
-    - Create dashboard
-    - Zabbix SIA
-  - status:
-    - 200
-    type: status
-  matchers-condition: and
-  method: GET
-  path:
-  - '{{BaseURL}}/zabbix/zabbix.php?action=dashboard.list'
 id: zabbix-dashboards-access
+
 info:
-  author: pussycat0x,vsh00t
-  classification:
-    cvss-metrics: CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:N/A:N
-    cvss-score: 5.8
-    cwe-id: CWE-522
-  description: zabbix-dashboards-access guest login credentials were successful.
-  metadata:
-    max-request: 1
   name: zabbix-dashboards-access
-  reference:
-  - https://www.exploit-db.com/ghdb/5595
-  - https://packetstormsecurity.com/files/163657/zabbix5x-sqlxss.txt
+  author: pussycat0x,vsh00t
   severity: medium
-  tags: edb,packetstorm,zabbix,unauth,misconfig,xss
+  description: View dashboard with guest login.
+  reference: |
+        - https://www.exploit-db.com/ghdb/5595
+        - https://packetstormsecurity.com/files/163657/zabbix5x-sqlxss.txt
+  tags: zabbix,unauth
+
+requests:
+  - payloads:
+      Subdomains: /home/mahmoud/Wordlist/AllSubdomains.txt
+    attack: sniper
+    threads: 100
+
+    raw:
+      - |
+        GET /zabbix/zabbix.php?action=dashboard.list HTTP/1.1
+        Host: {{Subdomains}}
+        User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0
+        Accept-Encoding: gzip, deflate
+        Accept: */*
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - "Create dashboard"
+          - "Zabbix SIA"
+        condition: and
+
+      - type: status
+        status:
+          - 200

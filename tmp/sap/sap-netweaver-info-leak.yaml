@@ -1,27 +1,36 @@
-http:
-- extractors:
-  - part: body
-    regex:
-    - <RFCDEST>.*</RFCDEST>
-    type: regex
-  matchers:
-  - part: body
-    regex:
-    - RFC_SYSTEM_INFO.Response
-    type: regex
-  method: GET
-  path:
-  - '{{BaseURL}}/sap/public/info'
 id: sap-netweaver-info-leak
+
 info:
+  name: SAP NetWeaver ICM Info page leak
   author: randomstr1ng
   description: Detection of SAP NetWeaver ABAP Webserver /public/info page
-  metadata:
-    max-request: 1
-    shodan-query: http.favicon.hash:-266008933
-  name: SAP NetWeaver ICM Info page leak
-  reference:
-  - https://www.acunetix.com/vulnerabilities/web/sap-icf-sap-public-info-sensitive-information-disclosure/
-  - https://github.com/Jean-Francois-C/SAP-Security-Audit
   severity: medium
-  tags: sap,misconfig
+  tags: sap
+  reference: |
+      - https://www.acunetix.com/vulnerabilities/web/sap-icf-sap-public-info-sensitive-information-disclosure/
+      - https://github.com/Jean-Francois-C/SAP-Security-Audit
+
+requests:
+  - payloads:
+      Subdomains: /home/mahmoud/Wordlist/AllSubdomains.txt
+    attack: sniper
+    threads: 100
+
+    raw:
+      - |
+        GET /sap/public/info HTTP/1.1
+        Host: {{Subdomains}}
+        User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0
+        Accept-Encoding: gzip, deflate
+        Accept: */*
+    matchers:
+      - type: regex
+        part: body
+        regex:
+          - "RFC_SYSTEM_INFO.Response"
+
+    extractors:
+      - type: regex
+        part: body
+        regex:
+          - "<RFCDEST>.*</RFCDEST>"

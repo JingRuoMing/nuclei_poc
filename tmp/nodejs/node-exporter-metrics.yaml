@@ -1,24 +1,31 @@
-http:
-- matchers:
-  - condition: and
-    part: body
-    type: word
-    words:
-    - node_cooling_device
-    - node_network
-  - status:
-    - 200
-    type: status
-  matchers-condition: and
-  method: GET
-  path:
-  - '{{BaseURL}}/metrics'
 id: node-exporter-metrics
+
 info:
-  author: pussycat0x
-  description: Information Disclosure of Garbage Collection
-  metadata:
-    max-request: 1
   name: Detect Node Exporter Metrics
+  author: pussycat0x
   severity: low
-  tags: node,exposure,debug,misconfig
+  description: Information Disclosure of Garbage Collection
+  tags: node,exposure,debug
+
+requests:
+  - payloads:
+      Subdomains: /home/mahmoud/Wordlist/AllSubdomains.txt
+    attack: sniper
+    threads: 100
+
+    raw:
+      - |
+        GET /metrics HTTP/1.1
+        Host: {{Subdomains}}
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "node_cooling_device"
+          - "node_network"
+        condition: and
+
+      - type: status
+        status:
+          - 200
