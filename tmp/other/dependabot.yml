@@ -1,25 +1,12 @@
-# Every ecosystem below carries a 7-day cooldown: a brand-new release can be
-# malicious or simply broken, and nothing here is urgent enough to take on the
-# day it ships. Dependabot security updates bypass the cooldown.
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
 version: 2
 updates:
-  - package-ecosystem: "pip"
+  - package-ecosystem: "npm" # or another package manager
     directory: "/"
     schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
-
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
-
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
+      interval: "daily"
+    open-pull-requests-limit: 5

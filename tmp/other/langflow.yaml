@@ -5,16 +5,17 @@ info:
   tags: detect,tech,langflow
   severity: info
   metadata:
+    fofa-query:
+    - title="langflow" || body="langflow"
     product: langflow
-    shodan-query:
-    - http.favicon.hash:1727196746
-    vendor: langflow
+    vendor: ibm
     verified: true
 http:
 - method: GET
   path:
   - '{{BaseURL}}/'
   matchers:
-  - type: favicon
-    hash:
-    - '1727196746'
+  - type: word
+    words:
+    - langflow
+    case-insensitive: true

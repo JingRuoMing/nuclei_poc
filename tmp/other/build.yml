@@ -1,88 +1,114 @@
-name: 🎉 Release Binary
+# Tests on Windows, Linux and macOS for every push. The installers are built and tried only on request
+# (Actions > build > Run workflow) or for a version tag (v1.2.3), because the private repository pays for
+# minutes (macOS minutes count ten times). A tag also attaches setup.exe and the source to a draft release.
+name: build
+
 on:
-  create:
-    tags:
-      - v*
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
   workflow_dispatch:
+    inputs:
+      installers:
+        description: "Also build and try the installers (with all networks on Linux and macOS)"
+        type: boolean
+        default: true
 
 jobs:
-  build-mac:
-    runs-on: macos-latest
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Code checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.21.4
-      - name: Install Dependences
-        run: |
-          brew install libpcap upx
-#          git submodule update --init --recursive --remote
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
-        with:
-          version: latest
-          args: release -f .github/build/mac.yml --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  # https://github.com/marketplace/actions/run-on-architecture#supported-platforms
-  build-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Code checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.21.4
-      - name: Install Dependences
-        run: |
-          sudo apt install -yy --fix-missing libpcap-dev upx
-#          git submodule update --init --recursive --remote
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
-        with:
-          version: latest
-          args: release -f .github/build/linux.yml --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+      - run: uv sync --python 3.12
+      - run: uv run ruff check src tests installer
+      - run: uv run pytest -q -p no:warnings
 
-  build-windows:
+  windows-setup:
+    if: github.event_name == 'workflow_dispatch' && inputs.installers || startsWith(github.ref, 'refs/tags/v')
+    needs: test
     runs-on: windows-latest
     steps:
-      - name: Code checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+      - name: Inno Setup
+        run: choco install innosetup -y --no-progress
+      - name: Build setup.exe
+        shell: pwsh
+        run: |
+          $env:UV_EXE = (Get-Command uv).Source
+          ./installer/build-windows.ps1
+      - name: Install silently with StarDist and Spotiflow, then check
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem installer/build/FociAnalyzer-Setup-*.exe | Select-Object -First 1
+          $p = Start-Process -Wait -PassThru $setup.FullName -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NETWORKS=stardist,spotiflow', "/DIR=$env:RUNNER_TEMP\fa"
+          Get-Content "$env:RUNNER_TEMP\fa\install.log" -Tail 20
+          if ($p.ExitCode -ne 0) { throw "setup failed" }
+          & "$env:RUNNER_TEMP\fa\.venv\Scripts\python.exe" installer/check.py
+          if ($LASTEXITCODE -ne 0) { throw "check failed" }
+      - name: Uninstall
+        shell: pwsh
+        run: |
+          Start-Process -Wait "$env:RUNNER_TEMP\fa\unins000.exe" -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES'
+          if (Test-Path "$env:RUNNER_TEMP\fa\.venv") { throw "the uninstaller left the program" }
+      - uses: actions/upload-artifact@v4
         with:
-          submodules: recursive
-          fetch-depth: 0
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-#      - name: Install upx
-#        run: |
-#          mkdir upx
-#          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-#          Invoke-WebRequest "https://github.com/upx/upx/releases/download/v3.96/upx-3.96-win32.zip" -OutFile "upx.zip"
-#          Expand-Archive upx.zip -DestinationPath upx
-#          setx PATH "$env:PATH;$(Get-Location)/upx/x86_64-w64-mingw32"
-      - name: Set up Go
-        uses: actions/setup-go@v4
+          name: windows-setup
+          path: installer/build/FociAnalyzer-Setup-*.exe
+
+  unix-install:
+    if: github.event_name == 'workflow_dispatch' && inputs.installers || startsWith(github.ref, 'refs/tags/v')
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: install.sh with all networks
+        run: FOCI_ANALYZER_INSTALL_DIR="$RUNNER_TEMP/fa" sh install.sh --networks all
+      - name: Check the networks
+        run: |
+          "$RUNNER_TEMP/fa/.venv/bin/python" installer/check.py
+      - name: The window starts
+        run: |
+          "$RUNNER_TEMP/fa/.venv/bin/foci-analyzer" --no-browser --port 8779 --home "$RUNNER_TEMP/home" &
+          for i in $(seq 30); do curl -sf http://127.0.0.1:8779/ >/dev/null && break; sleep 1; done
+          curl -sf http://127.0.0.1:8779/ | grep -q "Foci Analyzer"
+      - name: The menu entry or app
+        run: ls ~/.local/share/applications/foci-analyzer.desktop 2>/dev/null || ls -d ~/Applications/"Foci Analyzer.app"
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows-setup, unix-install]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
         with:
-          go-version: 1.21.4
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
+          name: windows-setup
+      # The release notes are the CHANGELOG section of this version ("## 1.2.3 ..."); the program shows them
+      # when it offers the update. It only counts releases with the setup attached (the repository also
+      # holds the releases of the Fiji macro).
+      - name: Release notes from the CHANGELOG
+        run: |
+          python3 - "${GITHUB_REF_NAME#v}" > notes.md <<'EOF'
+          import re, sys
+          text = open("CHANGELOG.md", encoding="utf-8").read()
+          m = re.search(r"^## " + re.escape(sys.argv[1]) + r"\b.*?$(.*?)(?=^## |\Z)", text, re.M | re.S)
+          print(m.group(1).strip() if m else "See CHANGELOG.md.")
+          EOF
+      - uses: softprops/action-gh-release@v2
         with:
-          version: latest
-          args: release -f .github/build/windows.yml --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
+          body_path: notes.md
+          files: FociAnalyzer-Setup-*.exe
