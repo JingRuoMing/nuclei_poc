@@ -1,35 +1,12 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
 version: 2
 updates:
-  - package-ecosystem: gomod
+  - package-ecosystem: "npm" # or another package manager
     directory: "/"
     schedule:
-      interval: weekly
-      day: monday
-      time: "04:00"
-      timezone: Asia/Shanghai
-    open-pull-requests-limit: 10
-    labels:
-      - dependencies
-      - go
-    commit-message:
-      prefix: deps
-    groups:
-      golang-x:
-        patterns:
-          - "golang.org/x/*"
-      chainreactors:
-        patterns:
-          - "github.com/chainreactors/*"
-
-  - package-ecosystem: github-actions
-    directory: "/"
-    schedule:
-      interval: weekly
-      day: monday
-      time: "04:30"
-      timezone: Asia/Shanghai
-    labels:
-      - dependencies
-      - github-actions
-    commit-message:
-      prefix: deps
+      interval: "daily"
+    open-pull-requests-limit: 5

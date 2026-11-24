@@ -1,5 +1,3 @@
-version: 2
-
 env:
   - GO111MODULE=on
 
@@ -7,11 +5,11 @@ project_name: scan4all
 builds:
   - id: scan4all-linux
     ldflags:
-      - -s -w -X main.Version={{ .Version }}
+      - -s -w
     binary: scan4all
     env:
       - CGO_ENABLED=1
-    main: .
+    main: main.go
     goos:
       - linux
     goarch:
@@ -30,7 +28,7 @@ builds:
 #      - from: ../config
 #        to: config
 archives:
-  - formats: [zip]
+  - format: zip
     files:
       - LICENSE*
       - README*
