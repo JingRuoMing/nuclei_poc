@@ -1,34 +1,29 @@
+http:
+- matchers:
+  - part: body
+    type: word
+    words:
+    - Kubernetes Enterprise Manager
+  - status:
+    - 200
+    type: status
+  matchers-condition: and
+  method: GET
+  path:
+  - '{{BaseURL}}'
 id: kubernetes-enterprise-manager
-
 info:
-  name: Detect Kubernetes Enterprise Manager
   author: pussycat0x
+  classification:
+    cpe: cpe:2.3:a:kubernetes:kubernetes:*:*:*:*:*:*:*:*
+    cvss-metrics: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N
+    cwe-id: CWE-200
+  description: Kubernetes Enterprise Manager panel was detected.
+  metadata:
+    fofa-query: app="Kubernetes-Enterprise-Manager"
+    max-request: 1
+    product: kubernetes
+    vendor: kubernetes
+  name: Kubernetes Enterprise Manager Panel - Detect
   severity: info
-  tags: tech,kubernetes
-#  additional-fields:
-#    fofa-dork: 'app="Kubernetes-Enterprise-Manager"'
-
-requests:
-  - payloads:
-      Subdomains: /home/mahmoud/Wordlist/AllSubdomains.txt
-    attack: sniper
-    threads: 100
-
-    raw:
-      - |
-        GET / HTTP/1.1
-        Host: {{Subdomains}}
-        User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0
-        Accept-Encoding: gzip, deflate
-        Accept: */*
-        
-    matchers-condition: and
-    matchers:
-      - type: word
-        part: body
-        words:
-          - "Kubernetes Enterprise Manager"
-
-      - type: status
-        status:
-          - 200
+  tags: tech,kubernetes,panel
