@@ -1,0 +1,362 @@
+name: CI
+
+# Lint, type-check and test. Also reused by publish.yml (workflow_call) as the release gate.
+# The docs site build/deploy stays in gh-pages.yml: it needs pages/id-token permissions that a
+# reusable-workflow call from publish.yml (contents: read) could not grant.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  # Reusable calls keep the caller's event and workflow name. Give each release run its
+  # own group so dispatching another version cannot cancel or replace its CI gate.
+  # Pushes to an open PR (synchronize) use their own group (see e2e-gate), so they cannot cancel
+  # the E2E run that started when the PR was opened or reopened.
+  group: ${{ github.workflow }}-${{ github.workflow == 'CI' && (github.event.pull_request.number || github.ref) || github.run_id }}${{ github.event.action == 'synchronize' && '-sync' || '' }}
+  cancel-in-progress: ${{ github.workflow == 'CI' }}
+
+jobs:
+  prek:
+    name: Lint and type-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+      # install extension deps too: each extension is type-checked and tested in its own package
+      # below, and root svelte-check reaches extensions/anywidget/reactive.svelte.ts through a test
+      # import (needs its `anywidget/types`)
+      - name: Install dependencies
+        uses: ./.github/actions/setup
+        with:
+          extensions: vscode anywidget jupyterlab
+          build-package: 'false'
+      # Locally the vp-staged hook checks only staged files; with nothing staged (CI) it is a
+      # no-op, so the repo-wide format/lint/type-aware pass runs explicitly here.
+      - name: Format, lint and type-check the whole repo
+        run: |
+          pnpm exec vp check
+          pnpm typecheck
+      - name: Run prek checks
+        uses: j178/prek-action@v3.1.0
+
+      # The root tsconfig excludes extensions/, and `vp build` strips types without
+      # checking them, so extensions/vscode/tsconfig.json never ran anywhere. The
+      # extension imports #lib types directly (file-viewer/eligibility, io/decompress,
+      # trajectory/format-detect), so a change to a shared type broke it silently -
+      # e.g. making HostFileRequest.filename required produced four errors nothing caught.
+      - name: Type-check and test VS Code extension
+        run: |
+          pnpm -C extensions/vscode run typecheck
+          pnpm -C extensions/vscode test
+
+      # Its settings and custom-editor selectors are generated from #lib, but only by a local
+      # prebuild, so a change to the shared lists could land with package.json left behind.
+      - name: Check VS Code package.json is in sync with #lib
+        run: pnpm -C extensions/vscode run sync-config -- --check
+
+      # Same blind spot as vscode: this tsconfig ran nowhere.
+      - name: Type-check and test JupyterLab extension
+        run: |
+          pnpm -C extensions/jupyterlab run typecheck
+          pnpm -C extensions/jupyterlab test
+
+      # The widget passes component props by name from a table; a renamed or removed prop
+      # (e.g. BarPlot.point_tween) went stale silently until this ran somewhere.
+      - name: Type-check anywidget
+        run: pnpm -C extensions/anywidget run typecheck
+
+  publint:
+    name: Validate npm package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+
+      - name: Install dependencies
+        uses: ./.github/actions/setup
+        with:
+          test-cache: package
+          extensions: anywidget
+          build-package: 'false' # built below
+
+      # publint checks that every export target exists, so build dist/ first
+      - name: Build and validate package exports and types
+        run: |
+          pnpm package:dist
+          pnpm run publint
+      # otherwise only gh-pages.yml (main) and publish.yml build it, so a broken build would
+      # surface as a failed docs deploy after merge
+      - name: Build anywidget bundle
+        run: |
+          pnpm -C extensions/anywidget run build
+          cd extensions/anywidget/build
+          test -s matterviz.js && test -s split/matterviz.js && test -s widget-model-keys.json
+          test -s widget-model-schema.json
+      - name: Test package exports and the widget model schema, and check unused code
+        run: |
+          pnpm exec vitest run tests/vitest/package-exports.test.ts tests/vitest/anywidget-model-schema.test.ts --fsModuleCache --fsModuleCachePath=.cache/vitest
+          pnpm run knip
+
+  unit-test-shards:
+    name: Unit tests (shard ${{ matrix.shard }}/4)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+      - name: Install dependencies
+        uses: ./.github/actions/setup
+        with:
+          test-cache: ${{ matrix.shard }}
+      - name: Run unit tests
+        # Built-output checks run once in publint; the remaining tests import source files.
+        run: pnpm exec vitest run --exclude=tests/vitest/package-exports.test.ts --exclude=tests/vitest/anywidget-model-schema.test.ts --shard=${{ matrix.shard }}/4 --maxWorkers=100% --fsModuleCache --fsModuleCachePath=.cache/vitest
+
+  # Calibrate timing stability on main/manual runs before making this a PR or release gate.
+  performance:
+    name: Performance baselines
+    if: github.workflow == 'CI' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+        with:
+          test-cache: performance
+      - name: Run isolated performance baselines
+        env:
+          MATTERVIZ_PERF: '1'
+        run: pnpm exec vitest run tests/vitest/perf-baselines.test.ts --maxWorkers=1 --no-file-parallelism --fsModuleCache --fsModuleCachePath=.cache/vitest --reporter=verbose --silent=false
+
+  # Keep the required check name and fail if any shard fails or is cancelled/skipped.
+  unit-tests:
+    name: Unit tests
+    if: always()
+    needs: [unit-test-shards, publint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all unit test shards
+        env:
+          RESULT: ${{ needs.unit-test-shards.result == 'success' && needs.publint.result == 'success' && 'success' || 'failure' }}
+        run: test "$RESULT" = success
+
+  # The full E2E suite (~15 min) runs when a PR is opened or reopened, on merge to main, on
+  # manual dispatch and as the release gate. A later push to an open PR (synchronize) skips it
+  # only when the PR's latest decided E2E gate passed AND every file changed since that run's
+  # head is a unit test or root-level doc, which no browser test can observe. Any other change
+  # (source, routes, demos, deps, config, the e2e tests themselves) reruns it, as does a failed
+  # or undecided gate, so a red E2E can't turn green by skipping and green can't go stale.
+  e2e-gate:
+    name: Decide whether E2E runs
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+    steps:
+      - id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACTION: ${{ github.event.action }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          run=true
+          if [ "$ACTION" = synchronize ]; then
+            # newest first. A run decides once any E2E job failed (even while its other jobs
+            # still run) or its test shards all ran and passed; running ones without a failure
+            # decide nothing, and neither do runs that skipped E2E: their aggregator reports
+            # success, which once let one early pass wave every later push through unchecked.
+            # Cancelled runs are skipped outright: their always() E2E aggregator job fails, which
+            # would read as a failed gate. Manually dispatched full runs of the branch count like
+            # PR runs; the head repo filter drops a fork's same-named branch and base-repo
+            # dispatches for fork PRs alike.
+            while read -r id sha; do
+              gate=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$id/jobs?per_page=100" \
+                --jq '[.jobs[] | select(.name | startswith("E2E"))] | [.[] | select(.name | test("^E2E (production|source)"))] as $ran | if any(.conclusion == "failure") then "failure" elif ($ran | length) > 0 and ($ran | all(.conclusion == "success")) then "success" else "" end' < /dev/null)
+              if [ "$gate" = failure ]; then break; fi
+              if [ "$gate" = success ]; then
+                # files changed since the passing run's head; a failed compare (force-pushed
+                # away base) or a truncated list (GitHub caps it at 300 files) reruns E2E
+                files=$(gh api "repos/$GITHUB_REPOSITORY/compare/$sha...$HEAD_SHA" \
+                  --jq 'if (.files | length) < 300 then .files[].filename else "TRUNCATED" end' < /dev/null) || break
+                if ! grep -qvE '^(tests/vitest/|[^/]+\.md$)' <<< "$files"; then run=false; fi
+                echo "changed since E2E passed at $sha:" && echo "$files"
+                break
+              fi
+            done < <(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?branch=$HEAD_REF&per_page=30" \
+              --jq ".workflow_runs[] | select(.id != $GITHUB_RUN_ID and (.event == \"pull_request\" or .event == \"workflow_dispatch\") and .head_repository.full_name == \"$HEAD_REPO\" and .conclusion != \"cancelled\") | \"\(.id) \(.head_sha)\"")
+          fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+
+  # Not behind the E2E gate: this is the only site build a PR push gets (gh-pages.yml builds
+  # on main only), so a route or build-config error must fail here, not after merge
+  build-site:
+    name: Build browser test site
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      # Inputs are the tracked files outside tests/ and .github/ plus the resolved dependency
+      # versions (no lockfile, so pnpm's node_modules record), so a test- or workflow-only push
+      # or a rerun reuses the last build of the same site instead of rebuilding (~70 s)
+      - name: Site build key
+        id: site-key
+        # ls-files, not ls-tree: ls-tree rejects exclude pathspecs, and its unnoticed error left a
+        # key of the dependency versions alone, so every commit reused a stale site. && plus
+        # pipefail now fail the step if the listing fails.
+        run: |
+          set -o pipefail
+          key=$( { git ls-files -s -- . ':!tests' ':!.github' && cat node_modules/.pnpm/lock.yaml; } | sha256sum | cut -c1-40)
+          echo "key=browser-test-site-$key" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        id: site-cache
+        with:
+          path: .svelte-kit/output/
+          key: ${{ steps.site-key.outputs.key }}
+      - name: Build production site
+        if: steps.site-cache.outputs.cache-hit != 'true'
+        run: pnpm exec vp build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: browser-test-site
+          path: .svelte-kit/output/
+          include-hidden-files: true
+          retention-days: 1
+
+  e2e-source:
+    name: E2E source inspection
+    needs: e2e-gate
+    if: needs.e2e-gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}
+      - run: pnpm exec playwright install chromium --no-shell
+      # Linux headless WebGPU presents transparent canvases, including drawImage captures.
+      - run: xvfb-run -a pnpm exec playwright test --headed
+        env:
+          MATTERVIZ_E2E_MODE: source
+          DEBUG: pw:browser
+          # the 210k-atom hotspot test takes ~6 min on CPU rendering: main, releases and
+          # manual runs only, so it doesn't sit on every PR's critical path
+          MATTERVIZ_PERF: ${{ github.event_name != 'pull_request' && '1' || '' }}
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-traces-source
+          path: test-results/
+          retention-days: 7
+
+  e2e-test-shards:
+    name: E2E production (shard ${{ matrix.shard }}/12)
+    needs: [e2e-gate, build-site]
+    if: needs.e2e-gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40 # the slowest shard takes ~5-7 min; retries of 90 s tests need headroom
+    strategy:
+      fail-fast: false # let every shard finish so we see all failures, not just the first
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+      - name: Install dependencies
+        uses: ./.github/actions/setup
+      - name: Read Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Cache Chromium
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}
+      - name: Install Chromium # a no-op when the cache restored this version's browser
+        run: pnpm exec playwright install chromium --no-shell
+      # Only the movie CLI test encodes with FFmpeg, so only the shard that drew it installs it
+      - name: Check whether this shard runs the movie CLI test
+        id: movie
+        run: pnpm exec playwright test --list --shard=${{ matrix.shard }}/12 | grep 'movie CLI' && echo ffmpeg=true >> "$GITHUB_OUTPUT" || true
+        env:
+          MATTERVIZ_E2E_MODE: preview
+      # FFmpeg's .deb files come from a cache: the runner's apt mirror stalls mid-download often
+      # enough to time out whole shards.
+      # Keyed on the runner image, whose updates change the package versions apt wants; the
+      # prefix restore lets a new image download only the packages that changed.
+      - name: Read runner image version
+        id: runner-image
+        if: steps.movie.outputs.ffmpeg
+        run: echo "version=${ImageOS:?}-${ImageVersion:?}" >> "$GITHUB_OUTPUT"
+      - name: Cache FFmpeg packages
+        if: steps.movie.outputs.ffmpeg
+        uses: actions/cache@v6
+        with:
+          path: ~/apt-archives
+          key: ffmpeg-debs-${{ runner.os }}-${{ runner.arch }}-${{ steps.runner-image.outputs.version }}
+          restore-keys: ffmpeg-debs-${{ runner.os }}-${{ runner.arch }}-
+      # Bounded: an unresponsive apt mirror once hung shards 3 and 6 until the 6 h job limit
+      - name: Install FFmpeg for the movie CLI test
+        if: steps.movie.outputs.ffmpeg
+        timeout-minutes: 5
+        run: |
+          mkdir -p ~/apt-archives/partial
+          APT_OPTS=(-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30)
+          sudo apt-get "${APT_OPTS[@]}" update
+          sudo apt-get "${APT_OPTS[@]}" -o Dir::Cache::Archives="$HOME/apt-archives" \
+            install --yes --no-install-recommends ffmpeg
+          # Drop debs the mirror no longer serves so the saved cache doesn't keep growing
+          sudo apt-get -o Dir::Cache::Archives="$HOME/apt-archives" autoclean
+          # apt downloads as root; the cache step saves the archives as the runner user
+          sudo chown -R "$USER" ~/apt-archives
+      - uses: actions/download-artifact@v8
+        with:
+          name: browser-test-site
+          path: .svelte-kit/output/
+      - name: Run E2E tests
+        run: xvfb-run -a pnpm exec playwright test --headed --shard=${{ matrix.shard }}/12
+        env:
+          MATTERVIZ_E2E_MODE: preview
+          DEBUG: pw:browser
+      - name: Upload failure traces
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-traces-shard-${{ matrix.shard }}
+          path: test-results/
+          retention-days: 7
+
+  # These four names are required by the main ruleset (e2e-gate reads shard 1's). Each gates
+  # the complete matrix and accepts skipped E2E jobs only when e2e-gate skipped them on purpose.
+  e2e-tests:
+    name: E2E tests (shard ${{ matrix.shard }}/4)
+    if: always()
+    needs: [e2e-gate, e2e-test-shards, e2e-source]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - name: Require all E2E test shards
+        env:
+          RESULT: ${{ ((needs.e2e-test-shards.result == 'success' && needs.e2e-source.result == 'success') || (needs.e2e-gate.outputs.run == 'false' && needs.e2e-test-shards.result == 'skipped' && needs.e2e-source.result == 'skipped')) && 'success' || 'failure' }}
+        run: test "$RESULT" = success
