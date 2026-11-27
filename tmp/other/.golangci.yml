@@ -1,30 +1,63 @@
+version: '2'
 run:
-  tests: false
-
-issues:
-  include:
-    - EXC0001
-    - EXC0005
-    - EXC0011
-    - EXC0012
-    - EXC0013
-
-  max-issues-per-linter: 0
-  max-same-issues: 0
-
+  timeout: 5m
 linters:
   enable:
-    - bodyclose
-    - exportloopref
-    - gofumpt
-    - goimports
+    - decorder
+    - errorlint
+    - gocyclo
+    - govet
     - gosec
-    - nilerr
+    - gosmopolitan
+    - intrange
+    - misspell
     - predeclared
-    - revive
-    - rowserrcheck
-    - sqlclosecheck
-    - tparallel
+    - reassign
+    - staticcheck
     - unconvert
     - unparam
-    - whitespace
+    - usestdlibvars
+    - wastedassign
+    - copyloopvar
+    - tparallel
+    - gochecknoglobals
+    - nolintlint
+    - modernize
+    - gocritic
+  settings:
+    govet:
+      enable:
+        - shadow
+    gocyclo:
+      min-complexity: 30
+    gosec:
+      excludes:
+        - G404             # deterministic RNG in tests/benchmarks only
+  exclusions:
+    generated: lax
+    rules:
+      - linters:
+          - gochecknoglobals
+          - gosec
+          - gocyclo
+        path: _test\.go
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

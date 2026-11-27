@@ -1,91 +1,111 @@
-name: Setup
-description: Node 24 + pnpm, root install, and optional extension installs
-
+name: "nf-test Action"
+description: "Runs nf-test with common setup steps"
 inputs:
-  extensions:
-    description: Space-separated extension dirs under extensions/ to also install
-    default: ''
-  build-package:
-    description: Build anywidget's local matterviz dependency (type checks use source aliases)
-    default: 'true'
-  test-cache:
-    description: Separate Vitest compilation cache for this suite or shard
-    default: ''
-
+  profile:
+    description: "Profile to use"
+    required: true
+  shard:
+    description: "Shard number for this CI job"
+    required: true
+  total_shards:
+    description: "Total number of test shards(NOT the total number of matrix jobs)"
+    required: true
+  paths:
+    description: "Test paths"
+    required: true
+  tags:
+    description: "Tags to pass as argument for nf-test --tag parameter"
+    required: false
 runs:
-  using: composite
+  using: "composite"
   steps:
-    - uses: actions/setup-node@v7
+    - name: Setup Nextflow
+      uses: nf-core/setup-nextflow@v2
       with:
-        node-version: 24
-    - name: Enable pnpm
+        version: "${{ env.NXF_VERSION }}"
+
+    - name: Set up Python
+      uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6
+      with:
+        python-version: "3.14"
+
+    - name: Install nf-test
+      uses: nf-core/setup-nf-test@v1
+      with:
+        version: "${{ env.NFT_VER }}"
+        install-pdiff: true
+
+    - name: Setup apptainer
+      if: contains(inputs.profile, 'singularity')
+      uses: eWaterCycle/setup-apptainer@main
+
+    - name: Set up Singularity
+      if: contains(inputs.profile, 'singularity')
       shell: bash
       run: |
-        corepack enable
-        # Node validates bytecode against the source and Node version before reusing it.
-        echo "NODE_COMPILE_CACHE=$HOME/.cache/node-compile" >> "$GITHUB_ENV"
-        # Install explicitly below; don't resolve dependencies again before every command.
-        echo "PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false" >> "$GITHUB_ENV"
-        # vite-plus 1.1's Rolldown deadlocks on this site's client build with its default pool on
-        # 4-vCPU runners (all workers idle on futexes); a larger pool builds in seconds. Rolldown
-        # reads it at startup, so it must be in the environment, not vite.config.ts.
-        echo "ROLLDOWN_WORKER_THREADS=16" >> "$GITHUB_ENV"
-    - name: Cache dependency downloads
-      uses: actions/cache@v6
+        mkdir -p $NXF_SINGULARITY_CACHEDIR
+        mkdir -p $NXF_SINGULARITY_LIBRARYDIR
+
+    - name: Conda setup
+      if: contains(inputs.profile, 'conda')
+      uses: conda-incubator/setup-miniconda@505e6394dae86d6a5c7fbb6e3fb8938e3e863830 # v3
       with:
-        path: |
-          ~/.local/share/pnpm/store
-          ~/.npm
-          ~/.cache/node-compile
-        key: deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('package.json', 'extensions/*/package.json') }}-${{ github.sha }}
-        restore-keys: deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('package.json', 'extensions/*/package.json') }}-
-    - shell: bash
+        auto-update-conda: true
+        conda-solver: libmamba
+        channels: conda-forge
+        channel-priority: strict
+        conda-remove-defaults: true
+
+    - name: Run nf-test
+      shell: bash
       env:
-        EXTENSIONS: ${{ inputs.extensions }}
-        BUILD_PACKAGE: ${{ inputs.build-package }}
-        # Root `prepare` (src/scripts/prepare.mjs) builds dist/ when it is missing so git
-        # dependencies (github:janosh/matterviz#main) install usable; jobs here build it
-        # explicitly where they need it, so skip the ~20 s svelte-package run on install.
-        MATTERVIZ_SKIP_PREPARE: 1
+        NFT_WORKDIR: ${{ env.NFT_WORKDIR }}
       run: |
-        # Git dependencies need prepare; generate the allowlist in CI. Keyed by repository: a
-        # bare package name does not approve a git dependency's build (pnpm 12 rejects it).
-        printf "allowBuilds:\n  'svelte-widgets@git+https://github.com/janosh/svelte-widgets.git': true\n" > pnpm-workspace.yaml
-        # Registry packages ship their generated artifacts, so their prepare scripts do not
-        # need to run. Keep their skipped builds non-fatal.
-        # Resolve moving Git branches afresh instead of reusing a previous lockfile's commit.
-        # pnpm prepares svelte-widgets with npm, whose peer resolver rejects its Vitest 5
-        # alongside vite-plus's optional Vitest 4 browser peers. Uppercase survives pnpm's
-        # lifecycle env filtering; pnpm still checks peers and runs the package's prepare.
-        NPM_CONFIG_LEGACY_PEER_DEPS=true pnpm install --no-lockfile --config.strict-dep-builds=false
-        # anywidget links the root package (`matterviz: link:../..`) and bundles its dist/, which
-        # only the root's svelte-package run builds (dependencies never run `prepare`).
-        if [ "$BUILD_PACKAGE" = true ]; then
-          case " $EXTENSIONS " in *" anywidget "*) pnpm package:dist ;; esac
-        fi
-        # --ignore-workspace: a freshly released dep trips pnpm's cooldown
-        # (minimumReleaseAge), auto-creating a pnpm-workspace.yaml that makes these
-        # standalone extension installs no-ops (skipping anywidget/@types/node/matterviz).
-        # strict-dep-builds: JupyterLab's fontawesome ships built artifacts, so its skipped
-        # lifecycle script is safe. anywidget links the root's svelte-widgets instead of
-        # fetching and preparing its own Git copy.
-        for ext in $EXTENSIONS; do
-          if [ "$ext" = vscode ]; then strict_builds=true; else strict_builds=false; fi
-          pnpm -C "extensions/$ext" install --no-lockfile --ignore-workspace \
-            --config.strict-dep-builds="$strict_builds"
-        done
-    - name: Cache test compilation
-      if: inputs.test-cache != ''
-      uses: actions/cache@v6
-      with:
-        path: |
-          .cache/node-compile
-          .cache/vitest
-        # The installed graph includes resolved Git SHAs. Include custom compiler plugins;
-        # Vitest hashes each source file and excludes import.meta.glob from its cache.
-        key: vitest-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('node_modules/.pnpm/lock.yaml', 'vite.config.ts', 'package.json', 'src/vite-plugins.ts', 'src/scripts/**') }}-${{ inputs.test-cache }}-${{ github.sha }}
-        restore-keys: vitest-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('node_modules/.pnpm/lock.yaml', 'vite.config.ts', 'package.json', 'src/vite-plugins.ts', 'src/scripts/**') }}-${{ inputs.test-cache }}-
-    - name: Enable cached test compilation
-      if: inputs.test-cache != ''
+        nf-test test \
+          --profile=+${{ inputs.profile }} \
+          $(if [ -n "${{ inputs.tags }}" ]; then echo "--tag ${{ inputs.tags }}"; fi) \
+          --ci \
+          --changed-since HEAD^ \
+          --verbose \
+          --tap=test.tap \
+          --shard ${{ inputs.shard }}/${{ inputs.total_shards }}
+
+          # Save the absolute path of the test.tap file to the output
+          echo "tap_file_path=$(realpath test.tap)" >> $GITHUB_OUTPUT
+
+    - name: Generate test summary
+      if: always()
       shell: bash
-      run: echo "NODE_COMPILE_CACHE=$GITHUB_WORKSPACE/.cache/node-compile" >> "$GITHUB_ENV"
+      run: |
+        # Add header if it doesn't exist (using a token file to track this)
+        if [ ! -f ".summary_header" ]; then
+          echo "# 🚀 nf-test results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | Test Name | Profile | Shard |" >> $GITHUB_STEP_SUMMARY
+          echo "|:------:|-----------|---------|-------|" >> $GITHUB_STEP_SUMMARY
+          touch .summary_header
+        fi
+
+        if [ -f test.tap ]; then
+          while IFS= read -r line; do
+            if [[ $line =~ ^ok ]]; then
+              test_name="${line#ok }"
+              # Remove the test number from the beginning
+              test_name="${test_name#* }"
+              echo "| ✅ | ${test_name} | ${{ inputs.profile }} | ${{ inputs.shard }}/${{ inputs.total_shards }} |" >> $GITHUB_STEP_SUMMARY
+            elif [[ $line =~ ^not\ ok ]]; then
+              test_name="${line#not ok }"
+              # Remove the test number from the beginning
+              test_name="${test_name#* }"
+              echo "| ❌ | ${test_name} | ${{ inputs.profile }} | ${{ inputs.shard }}/${{ inputs.total_shards }} |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done < test.tap
+        else
+          echo "| ⚠️ | No test results found | ${{ inputs.profile }} | ${{ inputs.shard }}/${{ inputs.total_shards }} |" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Clean up
+      if: always()
+      shell: bash
+      run: |
+        sudo rm -rf /home/ubuntu/tests/

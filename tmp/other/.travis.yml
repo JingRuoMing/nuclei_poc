@@ -1,7 +1,9 @@
 language: go
-arch:
-  - AMD64
-  - ppc64le
 go:
-  - 1.9
-  - tip
+    - 1.11
+    - 1.12
+    - 1.13
+    - 1.14.x
+    - master
+script:
+    - cd tests && make
